@@ -5,6 +5,11 @@ heading here is a patch cut automatically for dependency bumps alone; its
 GitHub Release lists them. The chart and the image are released together
 at every version.
 
+## v1.1.0
+
+- `tolerations` now defaults to `[]`; the estate-shaped `arch` toleration is no longer implied. Set it in values where the estate needs it.
+- README gains `Consumers` and `Neighbours`; ci-workflows pins moved to v3.13.1.
+
 ## v1.0.8
 
 - **`/readyz` reviews the pod's own token without an audience list.** The
