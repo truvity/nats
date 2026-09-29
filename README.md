@@ -6,15 +6,6 @@ TokenReview and answers the broker with a signed user JWT that places
 the client into the NATS account named after its namespace. No
 per-client credentials, no shared passwords.
 
-| Artifact | What | Status |
-| --- | --- | --- |
-| `charts/nats-auth-callout` | the responder as a Deployment beside a broker the estate runs, with its ServiceAccount, the `system:auth-delegator` binding and an optional egress NetworkPolicy | shipped |
-| `ghcr.io/truvity/nats-auth-callout/responder` | the responder image: a static binary on a distroless non-root base, `linux/amd64` and `linux/arm64` | shipped |
-| `github.com/truvity/nats-auth-callout` | the Go module (`pkg/nats-auth-callout`), and the same binary attached to each release for Linux and macOS | shipped |
-
-The chart publishes to `oci://ghcr.io/truvity/charts/nats-auth-callout`
-on every tag, at the same version as the image.
-
 ## Who it is for
 
 A platform team that runs one NATS broker for several tenants on
@@ -128,6 +119,16 @@ asks for no audience, so the pod's token is accepted as the kubelet
 issued it; the clients' audiences stay the clients' contract.
 [docs/reference.md](docs/reference.md) has every value and every
 environment variable.
+
+## Consumers
+
+- **truvity/gitops**: deploys the chart
+- **opwerm/nexus**: deploys the chart
+
+## Neighbours
+
+- **openbao**: seed custody and External Secrets integration (see docs/openbao-external-secrets.md)
+- **nats**: the broker this responder guards (upstream nats/nats chart for deployment)
 
 ## Documentation
 

@@ -43,9 +43,7 @@ serviceAccount:
 deploymentAnnotations: {}
 
 nodeSelector: {}
-tolerations:
-  - key: arch
-    operator: Exists
+tolerations: []
 
 resources:
   requests:
