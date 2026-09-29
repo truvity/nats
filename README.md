@@ -123,7 +123,7 @@ environment variable.
 ## Consumers
 
 - **truvity/gitops**: deploys the chart
-- **opwerm/nexus**: deploys the chart
+- **A second, non-AWS estate**: deploys the chart
 
 ## Neighbours
 
