@@ -92,9 +92,6 @@ spec:
         app.kubernetes.io/name: nats-auth-callout
     spec:
       serviceAccountName: nats-auth-callout
-      tolerations:
-        - key: arch
-          operator: Exists
       containers:
         - name: responder
           image: ghcr.io/truvity/nats-auth-callout/responder:0.0.0
