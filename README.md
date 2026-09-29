@@ -158,7 +158,7 @@ public history cannot be unpublished — so the rule is mechanical, not
 remembered.
 
 This repository follows the shared
-[component contract](https://github.com/truvity/ci-workflows/blob/master/docs/component-contract.md).
+[component contract](https://github.com/truvity/policy/blob/master/docs/contracts/component.md).
 
 ## Status
 
