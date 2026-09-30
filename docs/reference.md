@@ -19,7 +19,7 @@ configuration.
 
 | Value | Default | Type | Notes |
 | --- | --- | --- | --- |
-| `image.repository` | `ghcr.io/truvity/nats-auth-callout/responder` | string, non-empty | |
+| `image.repository` | `ghcr.io/truvity/nats/responder` | string, non-empty | |
 | `image.tag` | `""` | string | empty: the chart's `appVersion`, which the release workflow stamps to the release version, so the image and the chart are always the same version |
 | `image.pullPolicy` | `IfNotPresent` | `IfNotPresent`, `Always` or `Never` | |
 | `replicas` | `2` | integer, at least `1` | replicas are stateless and share the auth-callout queue group; while no replica is reachable the broker denies every non-AUTH login, so run two |
@@ -73,8 +73,8 @@ section), and the pod spec carries what the table lists.
 
 ## The responder
 
-`ghcr.io/truvity/nats-auth-callout/responder` (from the Go module
-`github.com/truvity/nats-auth-callout`, `cmd/responder`) is a static
+`ghcr.io/truvity/nats/responder` (from the Go module
+`github.com/truvity/nats`, `cmd/responder`) is a static
 binary on a distroless non-root base, built for `linux/amd64` and
 `linux/arm64`; the same binary is attached to every GitHub Release as a
 `tar.gz` for Linux and macOS on both architectures.

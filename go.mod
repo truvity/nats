@@ -1,4 +1,4 @@
-module github.com/truvity/nats-auth-callout
+module github.com/truvity/nats
 
 go 1.27.0
 

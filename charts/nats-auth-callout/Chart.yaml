@@ -7,9 +7,9 @@ type: application
 # release-public.yaml).
 version: 0.0.0
 appVersion: 0.0.0
-home: https://github.com/truvity/nats-auth-callout
+home: https://github.com/truvity/nats
 sources:
-  - https://github.com/truvity/nats-auth-callout
+  - https://github.com/truvity/nats
 keywords:
   - nats
   - auth-callout
