@@ -5,6 +5,10 @@ heading here is a patch cut automatically for dependency bumps alone; its
 GitHub Release lists them. The chart and the image are released together
 at every version.
 
+## v1.2.1
+
+- **Fix:** releases publish to the renamed repository. v1.2.0 was tagged but never published — its release run failed — so v1.2.1 is the first release with the new module path `github.com/truvity/nats` and image `ghcr.io/truvity/nats/responder`; the v1.2.0 notes below apply to it.
+
 ## v1.2.0
 
 - **Breaking: the Go module path is now `github.com/truvity/nats`.** The
