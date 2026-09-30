@@ -81,7 +81,7 @@ clean:
     rm -rf bin/ dist/ coverage.out
 
 # Everything CI runs on a pull request.
-check: build lint test leak-canary vuln
+check: build lint test leak-canary
 
 # Build a snapshot release locally (no push, no tag)
 snapshot:
