@@ -41,7 +41,7 @@ kos:
     labels:
       org.opencontainers.image.title: responder
       org.opencontainers.image.version: "{{ .Version }}"
-      org.opencontainers.image.source: https://github.com/truvity/nats-auth-callout
+      org.opencontainers.image.source: https://github.com/truvity/nats
 
 release:
   github:

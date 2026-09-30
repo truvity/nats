@@ -40,5 +40,5 @@ jobs:
       charts: '["nats-auth-callout"]'
       # Nest the image under the repo namespace:
       # ko names the artifact after the cmd dir (cmd/responder), so the
-      # published slug is ghcr.io/truvity/nats-auth-callout/responder.
-      ko-docker-repo: ghcr.io/truvity/nats-auth-callout
+      # published slug is ghcr.io/truvity/nats/responder.
+      ko-docker-repo: ghcr.io/truvity/nats

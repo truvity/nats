@@ -5,6 +5,22 @@ heading here is a patch cut automatically for dependency bumps alone; its
 GitHub Release lists them. The chart and the image are released together
 at every version.
 
+## Unreleased
+
+- **Breaking: the Go module path is now `github.com/truvity/nats`.** The
+  repository was renamed from `nats-auth-callout` to `nats`; the module
+  path follows it, inside v1. Upgrade step: replace the import path
+  `github.com/truvity/nats-auth-callout` with `github.com/truvity/nats`
+  in `go.mod` and every import. The package directory and the Go package
+  name (`natsauthcallout`) are unchanged.
+- **Breaking: the responder image is now
+  `ghcr.io/truvity/nats/responder`** (was
+  `ghcr.io/truvity/nats-auth-callout/responder`). The chart default
+  `image.repository` points at the new path, so a chart consumer only
+  bumps the chart version. Upgrade step: an install that pins the image
+  directly, or overrides `image.repository`, replaces the old path with
+  the new one. Older tags stay at the old path.
+
 ## v1.1.0
 
 - `tolerations` now defaults to `[]`; the estate-shaped `arch` toleration is no longer implied. Set it in values where the estate needs it.

@@ -5,7 +5,7 @@
 # see the README for the broker-side auth_callout wiring.
 
 image:
-  repository: ghcr.io/truvity/nats-auth-callout/responder
+  repository: ghcr.io/truvity/nats/responder
   tag: ""  # defaults to appVersion
   pullPolicy: IfNotPresent
 

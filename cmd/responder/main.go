@@ -5,7 +5,7 @@ package main
 import (
 	"os"
 
-	natsauthcallout "github.com/truvity/nats-auth-callout/pkg/nats-auth-callout"
+	natsauthcallout "github.com/truvity/nats/pkg/nats-auth-callout"
 )
 
 var (

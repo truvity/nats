@@ -49,7 +49,7 @@ spec:
       serviceAccountName: nats-auth-callout
       containers:
         - name: responder
-          image: ghcr.io/truvity/nats-auth-callout/responder:0.0.0
+          image: ghcr.io/truvity/nats/responder:0.0.0
           imagePullPolicy: IfNotPresent
           env:
             - name: NATS_URL

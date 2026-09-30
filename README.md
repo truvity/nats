@@ -163,7 +163,7 @@ This repository follows the shared
 ## Status
 
 Used in production by its maintainers. Releases are listed on the
-[releases page](https://github.com/truvity/nats-auth-callout/releases),
+[releases page](https://github.com/truvity/nats/releases),
 and [CHANGELOG.md](CHANGELOG.md) says what changed for a consumer in
 each.
 

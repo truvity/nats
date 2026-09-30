@@ -127,9 +127,23 @@ everyone from the first request
 
 ## Upgrading
 
-There has been no breaking release. Each version below that carried a
+The first release after the rename of the repository to `truvity/nats`
+carries two breaking changes, below. Each version below that carried a
 consumer-visible change lists the step it needs; a version absent from
 [CHANGELOG.md](../CHANGELOG.md) changed dependencies only.
+
+### v1.1.0 to the release after the rename: new module path and image path
+
+- **Go consumers:** replace `github.com/truvity/nats-auth-callout` with
+  `github.com/truvity/nats` in `go.mod` and every import. The package
+  directory (`pkg/nats-auth-callout`) and the package name are
+  unchanged: `import natsauthcallout "github.com/truvity/nats/pkg/nats-auth-callout"`.
+- **Chart consumers:** bump the chart version; the default
+  `image.repository` is now `ghcr.io/truvity/nats/responder`.
+- **Anyone pinning the image directly** (an `image.repository` override,
+  a mirror, an admission allow-list): change
+  `ghcr.io/truvity/nats-auth-callout/responder` to
+  `ghcr.io/truvity/nats/responder`. Older tags stay at the old path.
 
 ### v1.0.0 to v1.0.1: the schema admits the shipped placeholder
 
