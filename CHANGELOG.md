@@ -5,7 +5,7 @@ heading here is a patch cut automatically for dependency bumps alone; its
 GitHub Release lists them. The chart and the image are released together
 at every version.
 
-## Unreleased
+## v1.2.0
 
 - **Breaking: the Go module path is now `github.com/truvity/nats`.** The
   repository was renamed from `nats-auth-callout` to `nats`; the module
