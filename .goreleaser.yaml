@@ -1,4 +1,4 @@
-project_name: nats-auth-callout
+project_name: nats
 
 version: 2
 
@@ -46,7 +46,7 @@ kos:
 release:
   github:
     owner: truvity
-    name: nats-auth-callout
+    name: nats
 
 changelog:
   use: github-native
