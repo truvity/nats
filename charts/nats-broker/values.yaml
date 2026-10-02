@@ -1,0 +1,146 @@
+# nats-broker: a NATS broker from its upstream chart, unchanged, plus one
+# opt-in object of this chart's own: the alert rules.
+#
+# TWO NAMESPACES OF VALUES, and the split is Helm's, not a taste. Helm
+# gives a subchart its own key and `global`, nothing else:
+#
+#   nats     every value of the upstream nats chart, verbatim. What the
+#            upstream documents as `config.cluster.enabled` is
+#            `nats.config.cluster.enabled` here.
+#   global   shared with the subchart. Put a `global` value here and the
+#            subchart reads it as its own `global`; nesting it under
+#            `nats` works too and renders the same.
+#   alerts   this chart's own: the alert rules, below. Everything else
+#            the chart does is a preset FILE (presets/*.yaml), which is
+#            values and nothing more.
+#
+# THIS FILE SETS NOTHING THAT CHANGES A RENDER. With no values and no
+# preset the render is the upstream's, and hack/parity.sh proves it for
+# every case under tests/cases/: the same values, flattened, through the
+# upstream chart alone, must render the same objects. That is what lets an
+# installation that runs the upstream chart today move onto this one with
+# a zero diff. A default that changes the render is a Behaviour change
+# (CHANGELOG.md) and lands as an opt-in preset, never here.
+#
+# Nothing an estate owns has a default: no hostname, no storage class, no
+# node selector, no toleration, no registry, no cluster name. They are the
+# caller's values.
+nats: {}
+global: {}
+
+# -- OPT-IN alert rules for the broker's metrics (the upstream chart's
+# prometheus-nats-exporter sidecar and its PodMonitor, which the
+# presets/metrics.yaml preset turns on). Off: nothing is rendered.
+#
+# Every metric name was read off a live store scraping the exporter with
+# `-varz -connz -routez -jsz` (v0.20.x), never guessed:
+#   up{job}                                  the scrape itself
+#   nats_varz_routes / _cluster_pool_size    varz: route connections, pool
+#   nats_varz_jetstream_meta_cluster_size    varz: JetStream meta group size
+#   nats_varz_jetstream_meta_leader{value}   varz: leader name in `value`
+#   nats_server_total_streams{meta_leader}   jsz: server labels
+#   nats_stream_total_messages{stream_leader} jsz: stream labels
+#   nats_consumer_num_pending                jsz: consumer backlog
+#   nats_varz_slow_consumers                 varz: cumulative count
+#   nats_varz_jetstream_stats_storage / _config_max_storage   varz
+# Memory has no metric of the broker's own and is computed from cadvisor
+# and kube-state-metrics. The exporter has no authorization-error metric,
+# so there is no rule for it.
+#
+# The expressions are MetricsQL (a superset of PromQL; these nine are valid
+# in both) and `just rulecheck` parses them with the real parser.
+alerts:
+  enabled: false
+  # -- VMRule (operator.victoriametrics.com/v1beta1) or PrometheusRule
+  # (monitoring.coreos.com/v1). The spec is the same for both.
+  kind: VMRule
+  # -- The object's name. Default: <release fullname>-alerts.
+  name: ""
+  # -- Where the object lives. Default: the release namespace. A ruler in
+  # another namespace (a store's own) selects rule objects there.
+  namespace: ""
+  # -- Labels on the OBJECT. A ruler selects rule objects by these, so an
+  # install with a rule selector puts it here.
+  ruleLabels: {}
+  # -- Annotations on the OBJECT.
+  annotations: {}
+  # -- The rule group's name. It becomes the `alertgroup` label of every
+  # alert the ruler sends, so a route that matches on it is the reason to
+  # set it. A ruler refuses two groups of one name in one file, so a group
+  # moved from another chart keeps its old name only after the old one is
+  # gone (docs/broker.md, "Moving the rules").
+  groupName: nats
+  # -- How often the ruler evaluates the group.
+  interval: 1m
+  # -- Labels added to every rule, merged under each rule's own `severity`.
+  # An Alertmanager routing tree reads these: an install that routes by
+  # cluster or environment sets them here, once.
+  commonLabels: {}
+  # -- Base URL for the runbook link on every alert. The alert's name is
+  # appended. Empty renders no link.
+  runbookBaseUrl: ""
+  # -- The label that names the cluster a series came from, on a store that
+  # holds several clusters. Every aggregation matches on it, because
+  # `max by` without it merges the brokers of two clusters that share a pod
+  # name. On a single-cluster store, where the label is absent, it matches
+  # on empty, so the default is safe there too. Empty leaves it out of the
+  # expressions.
+  clusterLabel: k8s_cluster_name
+  # -- OPT-IN (empty changes nothing): a label that routes the alert (the
+  # company that owns the workload). An aggregation keeps only the labels
+  # in its `by (...)`; this joins them, so the label reaches the alert.
+  ownerLabel: ""
+  # -- How far back the NATSMetricsAbsent guard looks for a series that is
+  # no longer there. A store can hold several clusters' series, and a bare
+  # `absent()` is true only when the series is missing from EVERY cluster.
+  absentLookback: 1d
+  # -- The scrape job of the exporter: `<namespace>/<podmonitor>`. Default:
+  # derived from the release the way the upstream chart names its
+  # PodMonitor (`<namespace>/<release fullname>`).
+  job: ""
+  # -- Severity of the rules that mean the broker set is down or JetStream
+  # cannot serve (NATSBrokerDown, the two no-leader rules).
+  severity: critical
+  # -- Severity of the rest: degradation that is not yet an outage.
+  warningSeverity: warning
+  # -- How long an exporter must stay down before NATSBrokerDown fires.
+  brokerDownFor: 5m
+  # -- How long a broker must see too few routes. Covers a rolling restart
+  # of a peer.
+  routesFor: 10m
+  # -- How long the meta group or a stream may have no leader. An election
+  # takes seconds; 5m is a lost quorum.
+  leaderFor: 5m
+  backlog:
+    # -- Window over which the backlog must stay above `minPending` and
+    # grow.
+    window: 15m
+    # -- Backlog (messages) that must never be dropped under during the
+    # window, so a trickle of a few pending messages never alerts.
+    minPending: 100
+    for: 5m
+  slowConsumers:
+    window: 10m
+    for: 5m
+  storage:
+    # -- Fraction of the configured JetStream store.
+    ratio: 0.8
+    for: 15m
+  memory:
+    # -- Where the brokers run, to select cadvisor and kube-state-metrics
+    # series. Default: the release namespace.
+    namespace: ""
+    # -- The broker container's name.
+    container: nats
+    # -- Fraction of the container's memory limit.
+    ratio: 0.9
+    for: 10m
+  # -- How long no exporter series can exist before NATSMetricsAbsent.
+  absentFor: 30m
+  # -- Keep the series' own `clusterLabel` on the alert instead of stamping
+  # the common label of that name. Set it where one ruler evaluates
+  # several clusters' series (the shared-store topology): the alert then
+  # names the cluster the broker is in, not the one the ruler is in. Not
+  # applied to NATSMetricsAbsent, which always keeps its own cluster label
+  # (`absentLookback`).
+  keepClusterLabel: false

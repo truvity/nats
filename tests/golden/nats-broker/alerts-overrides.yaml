@@ -1,0 +1,605 @@
+---
+# Source: nats-broker/charts/nats/templates/pod-disruption-budget.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app.kubernetes.io/component: nats
+    app.kubernetes.io/instance: nats
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: bus
+    app.kubernetes.io/version: 2.15.0
+    helm.sh/chart: nats-2.15.0
+  name: nats-bus
+  namespace: messaging
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: nats
+      app.kubernetes.io/instance: nats
+      app.kubernetes.io/name: bus
+
+---
+# Source: nats-broker/charts/nats/templates/nats-box/contexts-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/component: nats-box
+    app.kubernetes.io/instance: nats
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: bus
+    app.kubernetes.io/version: 2.15.0
+    helm.sh/chart: nats-2.15.0
+  name: nats-bus-box-contexts
+  namespace: messaging
+stringData:
+  default.json: |
+    {
+      "url": "nats://nats-bus"
+    }
+type: Opaque
+
+---
+# Source: nats-broker/charts/nats/templates/config-map.yaml
+apiVersion: v1
+data:
+  nats.conf: |
+    {
+      "http_port": 8222,
+      "lame_duck_duration": "30s",
+      "lame_duck_grace_period": "10s",
+      "pid_file": "/var/run/nats/nats.pid",
+      "port": 4222,
+      "server_name": $SERVER_NAME
+    }
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/component: nats
+    app.kubernetes.io/instance: nats
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: bus
+    app.kubernetes.io/version: 2.15.0
+    helm.sh/chart: nats-2.15.0
+  name: nats-bus-config
+  namespace: messaging
+
+---
+# Source: nats-broker/charts/nats/templates/headless-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: nats
+    app.kubernetes.io/instance: nats
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: bus
+    app.kubernetes.io/version: 2.15.0
+    helm.sh/chart: nats-2.15.0
+  name: nats-bus-headless
+  namespace: messaging
+spec:
+  clusterIP: None
+  ports:
+  - appProtocol: tcp
+    name: nats
+    port: 4222
+    targetPort: nats
+  - appProtocol: http
+    name: monitor
+    port: 8222
+    targetPort: monitor
+  publishNotReadyAddresses: true
+  selector:
+    app.kubernetes.io/component: nats
+    app.kubernetes.io/instance: nats
+    app.kubernetes.io/name: bus
+
+---
+# Source: nats-broker/charts/nats/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: nats
+    app.kubernetes.io/instance: nats
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: bus
+    app.kubernetes.io/version: 2.15.0
+    helm.sh/chart: nats-2.15.0
+  name: nats-bus
+  namespace: messaging
+spec:
+  ports:
+  - appProtocol: tcp
+    name: nats
+    port: 4222
+    targetPort: nats
+  selector:
+    app.kubernetes.io/component: nats
+    app.kubernetes.io/instance: nats
+    app.kubernetes.io/name: bus
+
+---
+# Source: nats-broker/charts/nats/templates/nats-box/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: nats-box
+    app.kubernetes.io/instance: nats
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: bus
+    app.kubernetes.io/version: 2.15.0
+    helm.sh/chart: nats-2.15.0
+  name: nats-bus-box
+  namespace: messaging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: nats-box
+      app.kubernetes.io/instance: nats
+      app.kubernetes.io/name: bus
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: nats-box
+        app.kubernetes.io/instance: nats
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: bus
+        app.kubernetes.io/version: 2.15.0
+        helm.sh/chart: nats-2.15.0
+    spec:
+      containers:
+      - args:
+        - sh
+        - -ec
+        - trap true INT TERM; sleep infinity & wait
+        command:
+        - sh
+        - -ec
+        - |
+          work_dir="$(pwd)"
+          mkdir -p "$XDG_CONFIG_HOME/nats"
+          cd "$XDG_CONFIG_HOME/nats"
+          if ! [ -s context ]; then
+            ln -s /etc/nats-contexts context
+          fi
+          if ! [ -f context.txt ]; then
+            echo -n "default" > context.txt
+          fi
+          cd "$work_dir"
+          exec /entrypoint.sh "$@"
+        - --
+        image: natsio/nats-box:0.19.7
+        name: nats-box
+        resources: null
+        volumeMounts:
+        - mountPath: /etc/nats-contexts
+          name: contexts
+      enableServiceLinks: false
+      volumes:
+      - name: contexts
+        secret:
+          secretName: nats-bus-box-contexts
+
+---
+# Source: nats-broker/charts/nats/templates/stateful-set.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/component: nats
+    app.kubernetes.io/instance: nats
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: bus
+    app.kubernetes.io/version: 2.15.0
+    helm.sh/chart: nats-2.15.0
+  name: nats-bus
+  namespace: messaging
+spec:
+  podManagementPolicy: Parallel
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: nats
+      app.kubernetes.io/instance: nats
+      app.kubernetes.io/name: bus
+  serviceName: nats-bus-headless
+  template:
+    metadata:
+      annotations: null
+      labels:
+        app.kubernetes.io/component: nats
+        app.kubernetes.io/instance: nats
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: bus
+        app.kubernetes.io/version: 2.15.0
+        helm.sh/chart: nats-2.15.0
+    spec:
+      containers:
+      - args:
+        - --config
+        - /etc/nats-config/nats.conf
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: SERVER_NAME
+          value: $(POD_NAME)
+        image: nats:2.15.0-alpine
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - nats-server
+              - -sl=ldm=/var/run/nats/nats.pid
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz?js-enabled-only=true
+            port: monitor
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: nats
+        ports:
+        - containerPort: 4222
+          name: nats
+        - containerPort: 8222
+          name: monitor
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz?js-server-only=true
+            port: monitor
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources: {}
+        startupProbe:
+          failureThreshold: 90
+          httpGet:
+            path: /healthz
+            port: monitor
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: /etc/nats-config
+          name: config
+        - mountPath: /var/run/nats
+          name: pid
+      - args:
+        - -pid
+        - /var/run/nats/nats.pid
+        - -config
+        - /etc/nats-config/nats.conf
+        image: natsio/nats-server-config-reloader:0.23.0
+        name: reloader
+        volumeMounts:
+        - mountPath: /var/run/nats
+          name: pid
+        - mountPath: /etc/nats-config
+          name: config
+      - args:
+        - -port=7777
+        - -connz
+        - -routez
+        - -subz
+        - -varz
+        - -prefix=nats
+        - -use_internal_server_id
+        - http://localhost:8222/
+        image: natsio/prometheus-nats-exporter:0.20.1
+        name: prom-exporter
+        ports:
+        - containerPort: 7777
+          name: prom-metrics
+      enableServiceLinks: false
+      shareProcessNamespace: true
+      terminationGracePeriodSeconds: 60
+      volumes:
+      - configMap:
+          name: nats-bus-config
+        name: config
+      - emptyDir: {}
+        name: pid
+  volumeClaimTemplates: null
+
+---
+# Source: nats-broker/charts/nats/templates/pod-monitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  labels:
+    app.kubernetes.io/component: nats
+    app.kubernetes.io/instance: nats
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: bus
+    app.kubernetes.io/version: 2.15.0
+    helm.sh/chart: nats-2.15.0
+  name: nats-bus
+  namespace: messaging
+spec:
+  podMetricsEndpoints:
+  - port: prom-metrics
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: nats
+      app.kubernetes.io/instance: nats
+      app.kubernetes.io/name: bus
+
+---
+# Source: nats-broker/templates/alerts.yaml
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: nats-bus-alerts
+  labels:
+    app.kubernetes.io/name: nats-broker
+    app.kubernetes.io/instance: nats
+    app.kubernetes.io/managed-by: Helm
+spec:
+  groups:
+    - name: nats
+      interval: 1m
+      rules:
+        # A broker whose exporter is not being scraped.
+        #
+        # `up` is the scrape's own series for the PodMonitor job the NATS
+        # chart ships (`messaging/nats-bus`): 0 when the prometheus-nats-exporter
+        # sidecar does not answer, which is a broker down, a broker not
+        # ready, or the sidecar itself dead. `max by (pod)` so a pod whose
+        # address changed on restart reads as one broker, not two.
+        - alert: NATSBrokerDown
+          expr: >-
+            max by (k8s_cluster_name, pod) (up{job="messaging/nats-bus"}) == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "NATS broker {{ $labels.pod }} has not answered its metrics scrape for 5m"
+            description: >-
+              The exporter of NATS broker {{ $labels.pod }} (job messaging/nats-bus) has
+              been down for 5m. With three brokers the cluster and JetStream
+              keep a quorum through one loss, but not two. Check
+              `kubectl -n <namespace> get pods` and the pod's events and logs.
+        # A broker that sees fewer cluster routes than its peers need.
+        #
+        # `nats_varz_routes` is the number of route connections the broker
+        # holds. Every peer is reached over `cluster.pool_size` pooled
+        # routes (`nats_varz_cluster_pool_size`, 3 by default), plus one
+        # per pinned account, so a healthy 3-broker cluster reads 8, not 2.
+        # The floor is therefore peers x pool size, with peers read from the
+        # JetStream meta group size (`nats_varz_jetstream_meta_cluster_size`
+        # less this broker): a peer that is wholly unreachable drops the
+        # count well below it, while a single re-dialled route does not.
+        - alert: NATSClusterRoutesMissing
+          expr: >-
+            max by (k8s_cluster_name, pod) (nats_varz_routes{job="messaging/nats-bus"})
+            <
+            (
+              max by (k8s_cluster_name, pod) (nats_varz_jetstream_meta_cluster_size{job="messaging/nats-bus"} - 1)
+              *
+              max by (k8s_cluster_name, pod) (nats_varz_cluster_pool_size{job="messaging/nats-bus"})
+            )
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NATS broker {{ $labels.pod }} sees too few cluster routes ({{ $value }})"
+            description: >-
+              Broker {{ $labels.pod }} holds fewer route connections than one
+              pooled set per peer, for 10m: it has lost a
+              peer (a restart, a NetworkPolicy, a DNS or node problem), so
+              the cluster is partitioned or degraded. Check the other
+              brokers' own routes and `nats server report connections`.
+        # JetStream's meta group has no leader.
+        #
+        # `meta_leader` is a label of the jsz-derived series (the leader the
+        # reporting broker sees, empty while there is none) and
+        # `nats_varz_jetstream_meta_leader` carries the same name in its
+        # `value` label. Without a meta leader no stream or consumer can be
+        # created or changed, and JetStream API calls fail.
+        - alert: NATSJetStreamNoMetaLeader
+          expr: >-
+            max by (k8s_cluster_name, pod) (nats_server_total_streams{job="messaging/nats-bus", meta_leader=""})
+            or
+            max by (k8s_cluster_name, pod) (nats_varz_jetstream_meta_leader{job="messaging/nats-bus", value=""})
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "NATS JetStream has no meta leader, as seen by {{ $labels.pod }}"
+            description: >-
+              Broker {{ $labels.pod }} reports no JetStream meta leader for
+              5m. The meta group needs a majority of brokers
+              to elect one: check how many brokers are up and routed
+              (NATSBrokerDown, NATSClusterRoutesMissing) and the brokers'
+              logs for raft errors.
+        # A stream with no leader.
+        #
+        # Every `nats_stream_*` series carries `stream_leader`, the leader
+        # the reporting broker sees; empty while the stream's raft group
+        # has none. A stream without a leader accepts no publishes and
+        # serves no consumers.
+        - alert: NATSStreamNoLeader
+          expr: >-
+            max by (k8s_cluster_name, account, stream_name) (nats_stream_total_messages{job="messaging/nats-bus", stream_leader=""})
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "NATS stream {{ $labels.account }}/{{ $labels.stream_name }} has no leader"
+            description: >-
+              The stream {{ $labels.stream_name }} of account {{ $labels.account }}
+              has had no leader for 5m, so it takes no publishes
+              and serves no consumers. Usually a majority of its replicas is
+              down or unrouted; `nats stream info` and the brokers' logs say
+              which.
+        # A consumer whose backlog has not drained for the whole window and
+        # has grown over it.
+        #
+        # `nats_consumer_num_pending` is the messages not yet delivered to
+        # the consumer; every broker holding a replica reports it, hence the
+        # `max by`. The backlog must have stayed above `minPending` for the
+        # entire window (so a burst that drained does not count) and be
+        # higher at the end than at the start.
+        - alert: NATSConsumerBacklogGrowing
+          expr: >-
+            max by (k8s_cluster_name, account, stream_name, consumer_name) (
+              (delta(nats_consumer_num_pending{job="messaging/nats-bus"}[15m]) > 0)
+              and
+              (min_over_time(nats_consumer_num_pending{job="messaging/nats-bus"}[15m]) > 100)
+            )
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NATS consumer {{ $labels.stream_name }}/{{ $labels.consumer_name }} backlog keeps growing"
+            description: >-
+              The backlog of consumer {{ $labels.consumer_name }} on stream
+              {{ $labels.stream_name }} (account {{ $labels.account }}) has stayed
+              above 100 messages for 15m and is larger than at the
+              start of that window: the consumer is slower than the
+              producers or has stopped. Check the consuming service and
+              `nats consumer info`.
+        # Slow consumers: the broker dropped or throttled a client that
+        # could not keep up. `nats_varz_slow_consumers` is a cumulative
+        # count since the broker started, so only its increase means
+        # anything (`increase` also rides out a restart's reset).
+        - alert: NATSSlowConsumers
+          expr: >-
+            max by (k8s_cluster_name, pod) (increase(nats_varz_slow_consumers{job="messaging/nats-bus"}[10m])) > 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NATS broker {{ $labels.pod }} is cutting off slow consumers"
+            description: >-
+              The slow-consumer count of broker {{ $labels.pod }} rose within the
+              last 10m: a client is not reading
+              fast enough and the broker is dropping its messages or its
+              connection. `nats server report connections --sort pending`
+              names the client.
+        # JetStream's file store filling up.
+        #
+        # `nats_varz_jetstream_stats_storage` is the bytes the broker's
+        # JetStream holds on disk, `nats_varz_jetstream_config_max_storage`
+        # the store size it was configured with (the limit it enforces).
+        # A zero limit is filtered out rather than divided by.
+        - alert: NATSJetStreamStorageHigh
+          expr: >-
+            max by (k8s_cluster_name, pod) (nats_varz_jetstream_stats_storage{job="messaging/nats-bus"})
+            /
+            (max by (k8s_cluster_name, pod) (nats_varz_jetstream_config_max_storage{job="messaging/nats-bus"}) > 0)
+            > 0.8
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NATS broker {{ $labels.pod }} JetStream storage is above 80%"
+            description: >-
+              JetStream on broker {{ $labels.pod }} uses more than
+              80% of its configured file store for 15m. At the
+              limit publishes to streams that do not discard old messages
+              are refused. Check stream sizes and retention with `nats
+              stream report`, or grow the store.
+        # Broker memory near the container's limit.
+        #
+        # The broker exports no limit of its own (`go_gc_gomemlimit_bytes`
+        # is unset), so it is the container's working set (cadvisor) over
+        # the pod's memory limit (kube-state-metrics). A container without
+        # a limit has no `kube_pod_container_resource_limits` series and so
+        # is never alerted on.
+        - alert: NATSMemoryNearLimit
+          expr: >-
+            max by (k8s_cluster_name, pod) (container_memory_working_set_bytes{namespace="messaging", container="nats"})
+            /
+            max by (k8s_cluster_name, pod) (kube_pod_container_resource_limits{namespace="messaging", container="nats", resource="memory"})
+            > 0.9
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NATS broker {{ $labels.pod }} memory is above 90% of its limit"
+            description: >-
+              The working set of broker {{ $labels.pod }} has been above
+              90% of its memory limit for 10m; at the limit the
+              kernel kills it. Look for a connection or subscription surge
+              (`nats server report connections`) or raise the limit.
+        # The deadman for every rule above: no NATS exporter series at all
+        # (the PodMonitor gone, the scrape blocked, the chart not installed)
+        # reads as healthy to rules that compare values.
+        - alert: NATSMetricsAbsent
+          expr: >-
+            (group by (k8s_cluster_name) (max_over_time(up{job="messaging/nats-bus"}[1d])) unless group by (k8s_cluster_name) (up{job="messaging/nats-bus"})) or (absent(up{job="messaging/nats-bus"}) unless on() group(max_over_time(up{job="messaging/nats-bus"}[1d])))
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "No NATS exporter has been scraped for 30m{{ with $labels.k8s_cluster_name }} on cluster {{ . }}{{ end }}"
+            description: >-
+              up{job="messaging/nats-bus"} has not been seen in 30m{{ with $labels.k8s_cluster_name }} on cluster {{ . }}{{ end }}, so none of the
+              NATS rules can fire. Check that the NATS chart's PodMonitor is
+              applied and the brokers' metrics port is reachable from the
+              agent.
+---
+# Source: nats-broker/charts/nats/templates/tests/request-reply.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+  labels:
+    app.kubernetes.io/component: test-request-reply
+    app.kubernetes.io/instance: nats
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: bus
+    app.kubernetes.io/version: 2.15.0
+    helm.sh/chart: nats-2.15.0
+  name: nats-bus-test-request-reply
+spec:
+  containers:
+  - args:
+    - sh
+    - -ec
+    - nats reply --echo echo & pid="$!"; sleep 1; nats request echo hi > /tmp/resp;
+      kill "$pid"; wait; grep -qF hi /tmp/resp
+    command:
+    - sh
+    - -ec
+    - |
+      work_dir="$(pwd)"
+      mkdir -p "$XDG_CONFIG_HOME/nats"
+      cd "$XDG_CONFIG_HOME/nats"
+      if ! [ -s context ]; then
+        ln -s /etc/nats-contexts context
+      fi
+      if ! [ -f context.txt ]; then
+        echo -n "default" > context.txt
+      fi
+      cd "$work_dir"
+      exec /entrypoint.sh "$@"
+    - --
+    image: natsio/nats-box:0.19.7
+    name: nats-box
+    resources: null
+    volumeMounts:
+    - mountPath: /etc/nats-contexts
+      name: contexts
+  enableServiceLinks: false
+  restartPolicy: Never
+  volumes:
+  - name: contexts
+    secret:
+      secretName: nats-bus-box-contexts

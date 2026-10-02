@@ -1,0 +1,35 @@
+# The same rules as a PrometheusRule, on a single-cluster store (no cluster
+# label), with a runbook link and every threshold moved off its default.
+nats:
+  promExporter:
+    enabled: true
+    podMonitor:
+      enabled: true
+alerts:
+  enabled: true
+  kind: PrometheusRule
+  name: broker-rules
+  clusterLabel: ""
+  runbookBaseUrl: https://runbooks.example/nats/
+  interval: 30s
+  commonLabels:
+    team: messaging
+  severity: critical
+  warningSeverity: info
+  brokerDownFor: 2m
+  routesFor: 5m
+  leaderFor: 3m
+  backlog:
+    window: 30m
+    minPending: 1000
+    for: 10m
+  slowConsumers:
+    window: 20m
+    for: 10m
+  storage:
+    ratio: 0.7
+    for: 30m
+  memory:
+    ratio: 0.85
+    for: 20m
+  absentFor: 1h

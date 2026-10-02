@@ -20,6 +20,15 @@ broker's `accounts` or `auth_callout` block, and does not put the seed
 anywhere: it takes the name of a Secret. No cloud identity is involved;
 TokenReview needs only the built-in `system:auth-delegator` grant.
 
+## The broker chart
+
+This repository also publishes `nats-broker`: the upstream `nats` chart,
+pinned and vendored, that renders **exactly what the upstream chart
+renders** unless asked otherwise, with opt-in presets (restricted Pod
+Security, metrics, a JetStream cluster, spreading) and opt-in alert rules.
+See [docs/broker.md](docs/broker.md); moving an installation onto it is in
+[docs/adoption.md](docs/adoption.md#moving-a-broker-onto-nats-broker).
+
 ## The model
 
 Three nouns. The **broker** delegates authentication (config-mode

@@ -125,6 +125,38 @@ account's user is the `U…` form of the same seed; a mismatch denies
 everyone from the first request
 ([safety.md](safety.md#a-half-landed-rotation-denies-everyone)).
 
+## Moving a broker onto nats-broker
+
+An installation that runs the upstream `nats` chart moves onto
+`nats-broker` with a zero diff: nest the values one level under `nats`,
+change the chart source, and prove it first.
+
+```sh
+# 1. The upstream chart, at the version you run today, with your values.
+helm template nats nats --repo https://nats-io.github.io/k8s/helm/charts/ \
+  --version 2.15.0 --namespace nats -f values-before.yaml \
+  | grep -v '^# Source:' > before.yaml
+
+# 2. nats-broker, at the release that wraps the same upstream, with the
+#    same values nested under `nats`.
+helm template nats oci://ghcr.io/truvity/charts/nats-broker \
+  --version <v> --namespace nats -f values-after.yaml \
+  | grep -v '^# Source:' > after.yaml
+
+diff before.yaml after.yaml && echo "zero diff"
+```
+
+Same release name and namespace on both sides: both are in every object's
+labels. The `# Source:` lines are comments naming a template's path and
+nothing in a cluster sees them. The release's CHANGELOG entry names the
+upstream version it wraps: **adopt at the version you run**, because the
+upstream version moves the image and the pod template's version labels, and
+therefore rolls the brokers. Move the pin in a later change.
+
+Then, each on its own evidence: the alerts (`alerts.enabled`, which only
+adds one object), and the presets (a preset whose keys your values already
+set renders the same objects; one that sets more is a change to review).
+
 ## Upgrading
 
 The first release after the rename of the repository to `truvity/nats`

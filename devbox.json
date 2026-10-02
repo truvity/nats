@@ -8,7 +8,8 @@
     "just-lsp": "0.6.2",
     "just": "1.58.0",
     "ko": "0.19.1",
-    "kubernetes-helm": "4.2.4"
+    "kubernetes-helm": "4.2.4",
+    "yq-go": "4.53.3"
   },
   "env": {
     "GOEXPERIMENT": "jsonv2"

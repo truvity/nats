@@ -37,7 +37,12 @@ jobs:
       packages: write
     uses: truvity/ci-workflows/.github/workflows/release-public.yaml@02d66a9a2d64fe255d7703a1bebd764d0899f187 # v3.16.0
     with:
-      charts: '["nats-auth-callout"]'
+      # nats-broker packages software we do not build, so its appVersion
+      # would be right left alone, but this workflow stamps one mode for
+      # every chart and nats-auth-callout needs the release version (its
+      # image tag defaults to appVersion). The upstream release the broker
+      # wraps is the dependency in its Chart.yaml and its CHANGELOG entry.
+      charts: '["nats-auth-callout", "nats-broker"]'
       # Nest the image under the repo namespace:
       # ko names the artifact after the cmd dir (cmd/responder), so the
       # published slug is ghcr.io/truvity/nats/responder.

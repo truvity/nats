@@ -1,0 +1,13 @@
+# `global` at the root and under `nats`: Helm gives the subchart both, the
+# root one wins, and the upstream chart given the same values renders the
+# same objects (hack/parity.sh merges them the way Helm does).
+global:
+  labels:
+    team: platform
+  image:
+    pullPolicy: Always
+nats:
+  global:
+    image:
+      pullPolicy: IfNotPresent
+      registry: registry.example

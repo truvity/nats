@@ -1,0 +1,18 @@
+# A three-broker cluster with JetStream on a file store backed by a PVC.
+# OPT-IN. Size and storage class are yours to set (`nats.config.jetstream.
+# fileStore.pvc.size` / `.storageClassName`): they depend on the estate.
+#
+# Three is the smallest cluster that keeps a JetStream quorum through the
+# loss of one broker. Shrinking the volume later means recreating the
+# StatefulSet and its PVCs (volumeClaimTemplates are immutable), so choose
+# the size with that in mind.
+nats:
+  config:
+    cluster:
+      enabled: true
+      replicas: 3
+    jetstream:
+      enabled: true
+      fileStore:
+        pvc:
+          enabled: true

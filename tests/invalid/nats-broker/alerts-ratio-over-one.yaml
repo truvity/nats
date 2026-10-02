@@ -1,0 +1,4 @@
+alerts:
+  enabled: true
+  storage:
+    ratio: 80
