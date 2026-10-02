@@ -14,9 +14,9 @@ enforces it on every pull request.
 Published as `oci://ghcr.io/truvity/charts/nats-broker`. Its version is the
 repository's tag; the upstream release it wraps is the dependency in
 `Chart.yaml` and is named in each [CHANGELOG](../CHANGELOG.md) entry.
-`appVersion` in the checked-in `Chart.yaml` records the upstream's; the
-release workflow stamps the published chart with the release version, as it
-does for every chart in this repository.
+The release workflow stamps `version` and `appVersion` of the published
+chart with the release version, as it does for every chart in this
+repository; the upstream version is the dependency.
 
 ## Values
 

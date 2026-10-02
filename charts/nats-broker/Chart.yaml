@@ -8,9 +8,10 @@ description: >-
 type: application
 # Stamped from the tag by the release workflow; never moved by hand.
 version: 0.0.0
-# The upstream APPLICATION version the vendored archive carries
-# (hack/check-app-version.sh holds the two together).
-appVersion: 2.15.0
+# Stamped from the tag by the release workflow, like version. The upstream
+# release this chart wraps is the dependency below, which
+# hack/check-app-version.sh holds to the vendored archive.
+appVersion: 0.0.0
 keywords:
   - nats
   - jetstream

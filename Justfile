@@ -51,7 +51,7 @@ lint:
       done
       echo "$chart: schema and $(ls tests/invalid/"$chart"/*.yaml | wc -l | tr -d ' ') negative fixtures OK"
     done
-    # appVersion records the upstream release the vendored archive carries.
+    # The dependency pin must be the vendored archive.
     hack/check-app-version.sh
     golangci-lint config verify
     golangci-lint run ./...
