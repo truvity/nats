@@ -1,0 +1,3 @@
+alerts:
+  enabled: true
+  clusterLabel: "k8s-cluster-name"

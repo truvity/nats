@@ -1,0 +1,18 @@
+# The rules as a VMRule on a store that holds several clusters: the series'
+# own cluster label is kept on the alert (keepClusterLabel), the owner label
+# routes it, and the common label names the cluster the ruler is in.
+nats:
+  promExporter:
+    enabled: true
+    podMonitor:
+      enabled: true
+alerts:
+  enabled: true
+  namespace: observability
+  groupName: nats
+  ruleLabels:
+    ruler: shared
+  commonLabels:
+    k8s_cluster_name: ruler-cluster
+  ownerLabel: owner
+  keepClusterLabel: true

@@ -383,6 +383,54 @@
           "store_path": "/nix/store/69m712ydd319xm8bg7s744wqfca27fqj-kubernetes-helm-4.2.4"
         }
       }
+    },
+    "yq-go@4.53.3": {
+      "last_modified": "2026-09-29T03:29:29Z",
+      "resolved": "github:NixOS/nixpkgs/b6c8664de9b6cc07fe5666a29f91884ba81197c4#yq-go",
+      "source": "devbox-search",
+      "version": "4.53.3",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/wf3i9shd36xf55dnxj3znbkdxy2bvbjb-yq-go-4.53.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/wf3i9shd36xf55dnxj3znbkdxy2bvbjb-yq-go-4.53.3"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/zmydgmn2gmj49jb9amac2l5gcixxmfah-yq-go-4.53.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/zmydgmn2gmj49jb9amac2l5gcixxmfah-yq-go-4.53.3"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/agf9fyr053m3092vsmh6vih3apz0kw05-yq-go-4.53.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/agf9fyr053m3092vsmh6vih3apz0kw05-yq-go-4.53.3"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/1amm7nq53sw7cnd8kvx4nlp1pm9041dn-yq-go-4.53.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/1amm7nq53sw7cnd8kvx4nlp1pm9041dn-yq-go-4.53.3"
+        }
+      }
     }
   }
 }

@@ -1,0 +1,66 @@
+# Pod Security `restricted` on every container of the broker pod and of the
+# nats-box pod. OPT-IN: pass this file with `-f` (or Argo CD `valueFiles`)
+# BEFORE your own values; your values win where they set the same key.
+#
+# The images start as root; none of them needs it. The JetStream volume is
+# made writable by `fsGroup`, and everything else is a read-only mount. One
+# pod-level user for the whole broker pod, so the config reloader can still
+# signal the server through the shared process namespace.
+#
+# Merge semantics are the upstream chart's: `merge` is a strategic merge
+# onto the container or pod spec, so the `securityContext` added here sits
+# beside, not over, anything else you merge in (resources, nodeSelector).
+nats:
+  podTemplate:
+    merge:
+      spec:
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          fsGroup: 1000
+          seccompProfile:
+            type: RuntimeDefault
+  container:
+    merge:
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+  reloader:
+    merge:
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+  promExporter:
+    merge:
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+  natsBox:
+    container:
+      merge:
+        # The image's WORKDIR is /root (mode 700, root). The chart's start
+        # script does `cd "$(pwd)"` after writing its context under /nsc
+        # (owned by the image's uid 1000), so a non-root user must start
+        # somewhere it can enter.
+        workingDir: /tmp
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+    podTemplate:
+      merge:
+        spec:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault

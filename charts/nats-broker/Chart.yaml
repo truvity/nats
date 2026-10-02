@@ -1,0 +1,30 @@
+apiVersion: v2
+name: nats-broker
+description: >-
+  A NATS broker, installed from the upstream nats chart, with this
+  repository's schema, goldens, adoption gate, presets and an opt-in set of
+  alert rules around it. With no values and no preset it renders exactly what
+  the upstream chart renders.
+type: application
+# Stamped from the tag by the release workflow; never moved by hand.
+version: 0.0.0
+# The upstream APPLICATION version the vendored archive carries
+# (hack/check-app-version.sh holds the two together).
+appVersion: 2.15.0
+keywords:
+  - nats
+  - jetstream
+  - messaging
+  - kubernetes
+home: https://github.com/truvity/nats
+sources:
+  - https://github.com/truvity/nats
+  - https://github.com/nats-io/k8s
+  - https://github.com/nats-io/nats-server
+dependencies:
+  - name: nats
+    version: 2.15.0
+    repository: https://nats-io.github.io/k8s/helm/charts/
+    # `broker.enabled: false` renders the alerts alone (see values.yaml).
+    # An absent value leaves the dependency ON, so this defaults nothing.
+    condition: broker.enabled

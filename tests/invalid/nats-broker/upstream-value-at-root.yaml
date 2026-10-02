@@ -1,0 +1,5 @@
+# Upstream values pasted at the root are not nested under `nats`: ignored
+# without the schema, and the install runs on the defaults.
+config:
+  cluster:
+    enabled: true

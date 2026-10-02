@@ -1,0 +1,19 @@
+# Spread the brokers: one per NODE, hard, and across zones, soft. OPT-IN.
+#
+# One broker per node, `DoNotSchedule`: two brokers on one node make that
+# node a single point of failure for the JetStream quorum. A broker that
+# cannot be spread stays Pending rather than co-locating, so the cluster
+# needs (or must be able to launch) as many nodes as brokers.
+#
+# Zones are `ScheduleAnyway`, a preference: with zonal volumes (EBS-like) a
+# broker is pinned to its volume's zone, and a hard zone spread can make a
+# pod permanently unschedulable the day the set of zones with nodes widens.
+nats:
+  podTemplate:
+    topologySpreadConstraints:
+      topology.kubernetes.io/zone:
+        maxSkew: 1
+        whenUnsatisfiable: ScheduleAnyway
+      kubernetes.io/hostname:
+        maxSkew: 1
+        whenUnsatisfiable: DoNotSchedule

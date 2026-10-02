@@ -1,0 +1,75 @@
+# An estate-shaped install, every value the upstream chart's own and nested
+# one level: a three-broker JetStream cluster on PVCs, the exporter and its
+# PodMonitor, accounts and an auth-callout block through config.merge,
+# resources, a node selector with a toleration, and the spread constraints.
+nats:
+  config:
+    cluster:
+      enabled: true
+      replicas: 3
+      routeURLs:
+        k8sClusterDomain: cluster.example
+    jetstream:
+      enabled: true
+      fileStore:
+        pvc:
+          enabled: true
+          size: 1Gi
+          storageClassName: fast
+    merge:
+      accounts:
+        AUTH:
+          users:
+            - nkey: UEXAMPLEUSERKEYEXAMPLEUSERKEYEXAMPLEUSERKEYEXAMPLEUSERKEYEXAMPLE
+        tenant-a:
+          jetstream: enabled
+      authorization:
+        auth_callout:
+          issuer: AEXAMPLEISSUERKEYEXAMPLEISSUERKEYEXAMPLEISSUERKEYEXAMPLEISSUERKEXX
+          auth_users:
+            - UEXAMPLEUSERKEYEXAMPLEUSERKEYEXAMPLEUSERKEYEXAMPLEUSERKEYEXAMPLE
+          account: AUTH
+  promExporter:
+    enabled: true
+    podMonitor:
+      enabled: true
+  container:
+    merge:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          memory: 512Mi
+  reloader:
+    merge:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          memory: 64Mi
+  podTemplate:
+    merge:
+      spec:
+        nodeSelector:
+          kubernetes.io/arch: arm64
+        tolerations:
+          - key: arch
+            operator: Exists
+    topologySpreadConstraints:
+      topology.kubernetes.io/zone:
+        maxSkew: 1
+        whenUnsatisfiable: ScheduleAnyway
+      kubernetes.io/hostname:
+        maxSkew: 1
+        whenUnsatisfiable: DoNotSchedule
+  natsBox:
+    podTemplate:
+      merge:
+        spec:
+          nodeSelector:
+            kubernetes.io/arch: arm64
+          tolerations:
+            - key: arch
+              operator: Exists

@@ -1,0 +1,11 @@
+# A release that is not called `nats`: the upstream chart names the
+# PodMonitor `queue-nats`, and the rules must read the job that carries
+# that name (hack/alerts-check.sh holds the two together). `nameOverride`
+# and `namespaceOverride` move it again.
+nats:
+  promExporter:
+    enabled: true
+    podMonitor:
+      enabled: true
+alerts:
+  enabled: true

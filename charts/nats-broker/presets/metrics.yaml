@@ -1,0 +1,13 @@
+# The metrics the `alerts` rules read: the upstream chart's
+# prometheus-nats-exporter sidecar (`prom-metrics`, :7777, reading the
+# broker's own monitor port on localhost) and its PodMonitor, which a
+# prometheus-operator or VictoriaMetrics operator turns into a scrape. OPT-IN.
+#
+# The PodMonitor sets no interval, so the scraper's own default applies.
+# The exporter's port must be reachable from the scraper: a NetworkPolicy
+# that admits clients to 4222 only will black out the scrape.
+nats:
+  promExporter:
+    enabled: true
+    podMonitor:
+      enabled: true

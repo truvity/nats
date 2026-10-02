@@ -5,6 +5,28 @@ heading here is a patch cut automatically for dependency bumps alone; its
 GitHub Release lists them. The chart and the image are released together
 at every version.
 
+## v1.3.0
+
+- **New chart: `nats-broker`,** published as
+  `oci://ghcr.io/truvity/charts/nats-broker`. It wraps the upstream `nats`
+  chart 2.15.0 (NATS server 2.15.0), values nested one level under `nats`.
+  With no values and no preset the render is the upstream chart's, object for
+  object (`hack/parity.sh`, every case in `tests/cases/nats-broker`). A
+  chart's version is the repository's tag, so this is the first release to
+  carry it and its version starts at 1.3.0, not 0.x; the nats-auth-callout
+  chart and the responder image are unchanged.
+- **Opt-in presets** (values files under `presets/`, none applied by
+  default): `restricted` (Pod Security restricted on the broker, reloader,
+  exporter and nats-box), `metrics` (exporter and PodMonitor),
+  `jetstream-cluster` and `spread`.
+- **Opt-in `alerts`** (off by default): nine rules for the broker's metrics
+  as a VMRule or a PrometheusRule (`alerts.kind`), the same expressions the
+  `nats` group of `truvity/observability`'s `platform-alerts` chart carries,
+  with `keepClusterLabel` for a store that holds several clusters. See
+  docs/broker.md, "Moving the rules".
+- `values.schema.json` refuses an unknown top-level key, in particular
+  upstream values pasted at the root.
+
 ## v1.2.1
 
 - **Fix:** releases publish to the renamed repository. v1.2.0 was tagged but never published — its release run failed — so v1.2.1 is the first release with the new module path `github.com/truvity/nats` and image `ghcr.io/truvity/nats/responder`; the v1.2.0 notes below apply to it.

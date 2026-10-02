@@ -23,9 +23,19 @@ for values in "$root"/tests/cases/*/*/values.yaml; do
   # are exactly what a second install in one namespace depends on.
   release="$(cat "$case_dir/release" 2>/dev/null || echo "$chart")"
 
+  # A case may name presets (tests/cases/<chart>/<case>/presets, one per
+  # line): charts/<chart>/presets/<name>.yaml, passed BEFORE the case's own
+  # values the way an adopter layers them.
+  preset_args=()
+  if [ -f "$case_dir/presets" ]; then
+    while read -r preset; do
+      [ -n "$preset" ] && preset_args+=(-f "$root/charts/$chart/presets/$preset.yaml")
+    done < "$case_dir/presets"
+  fi
+
   rendered="$(helm template "$release" "$root/charts/$chart" \
       --namespace "$(cat "$case_dir/namespace" 2>/dev/null || echo default)" \
-      -f "$values")"
+      "${preset_args[@]}" -f "$values")"
 
   if [ "$mode" = update ]; then
     mkdir -p "$(dirname "$golden")"

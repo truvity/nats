@@ -1,0 +1,11 @@
+# nameOverride and namespaceOverride rename what the PodMonitor is called
+# and where it lives; the rules follow both without `alerts.job`.
+nats:
+  nameOverride: bus
+  namespaceOverride: messaging
+  promExporter:
+    enabled: true
+    podMonitor:
+      enabled: true
+alerts:
+  enabled: true
