@@ -5,6 +5,20 @@ heading here is a patch cut automatically for dependency bumps alone; its
 GitHub Release lists them. The chart and the image are released together
 at every version.
 
+## Unreleased
+
+- **`nats-broker` alerts: `NATSMetricsAbsent` ignores series without the
+  cluster label.** With `alerts.clusterLabel` set, the per-cluster
+  comparison of the series seen within `absentLookback` against the ones
+  present now took in a stale series lacking the cluster label (left over
+  from before a relabel); it sat in the lookback side under a label set the
+  current side could never match, so the alert fired on a healthy broker
+  until it aged out. The comparison now requires `<clusterLabel>!=""` on
+  both sides; the whole-store `absent()` line is unchanged. Alerts for a
+  series that was labelled and stopped still fire. The same change is in
+  `truvity/observability`'s `platform-alerts` chart, so the two copies stay
+  equal.
+
 ## v1.3.0
 
 - **New chart: `nats-broker`,** published as
