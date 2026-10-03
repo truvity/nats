@@ -5,7 +5,7 @@ heading here is a patch cut automatically for dependency bumps alone; its
 GitHub Release lists them. The chart and the image are released together
 at every version.
 
-## Unreleased
+## v1.3.1
 
 - **`nats-broker` alerts: `NATSMetricsAbsent` ignores series without the
   cluster label.** With `alerts.clusterLabel` set, the per-cluster
