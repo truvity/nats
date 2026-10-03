@@ -69,9 +69,15 @@ store can hold several clusters' series: the series vanishing from one
 cluster leaves the others' behind, `absent()` stays false, and the outage is
 silent. This renders, for a non-empty `clusterLabel`:
 
-  (group by (<cluster>) (max_over_time(sel[<absentLookback>]))
-     unless group by (<cluster>) (sel))
+  (group by (<cluster>) (max_over_time(sel'[<absentLookback>]))
+     unless group by (<cluster>) (sel'))
   or (absent(sel) unless on() group(max_over_time(sel[<absentLookback>])))
+
+where sel' is sel with `<cluster>!=""` added. A series without the cluster
+label (a stale one from before a relabel, say) would sit in the lookback side
+under a label set the current side can never match, and the first line would
+stay true until it aged out; requiring the label on both sides leaves it out
+of the per-cluster comparison. The whole-store line keeps the plain sel.
 
 The first line fires once per cluster that HAD the series within
 `absentLookback` and no longer does; its result carries that label, which
@@ -85,7 +91,9 @@ outage is one alert. Empty `clusterLabel` renders the bare `absent()`.
 {{- if $r.Values.alerts.clusterLabel -}}
 {{- $l := $r.Values.alerts.clusterLabel -}}
 {{- $lb := $r.Values.alerts.absentLookback -}}
-(group by ({{ $l }}) (max_over_time({{ .sel }}[{{ $lb }}])) unless group by ({{ $l }}) ({{ .sel }})) or (absent({{ .sel }}) unless on() group(max_over_time({{ .sel }}[{{ $lb }}])))
+{{- $sc := printf `%s{%s!=""}` .sel $l -}}
+{{- if hasSuffix "}" .sel -}}{{- $sc = printf `%s, %s!=""}` (trimSuffix "}" .sel) $l -}}{{- end -}}
+(group by ({{ $l }}) (max_over_time({{ $sc }}[{{ $lb }}])) unless group by ({{ $l }}) ({{ $sc }})) or (absent({{ .sel }}) unless on() group(max_over_time({{ .sel }}[{{ $lb }}])))
 {{- else -}}
 absent({{ .sel }})
 {{- end -}}
