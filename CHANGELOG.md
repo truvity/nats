@@ -5,6 +5,10 @@ heading here is a patch cut automatically for dependency bumps alone; its
 GitHub Release lists them. The chart and the image are released together
 at every version.
 
+## v1.3.2
+
+- Dependency updates.
+
 ## v1.3.1
 
 - **`nats-broker` alerts: `NATSMetricsAbsent` ignores series without the
