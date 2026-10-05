@@ -1,0 +1,129 @@
+# Per-tenant accounts and an auth-callout for the broker. OPT-IN: pass this
+# file with `-f` (or Argo CD `valueFiles`) BEFORE your own values, and give
+# it its inputs under `global.tenancy` (below). It is values and nothing
+# more: it uses the upstream chart's own `$tplYamlSpread` mechanism to turn
+# a short list of rows into the `accounts`, `authorization.auth_callout`
+# and, when client identities are given, the TLS block the broker needs.
+#
+# THE INPUTS, `global.tenancy` (shared with the upstream chart as its
+# `global`, which is how a template in the upstream chart can read them):
+#
+#   authCallout:
+#     issuer: <the callout's ACCOUNT nkey public key, "A...">
+#     user:   <the same key as a USER nkey, "U...">; the one user of the
+#             AUTH account, and exempt from the callout it serves.
+#   accounts: [name, ...]
+#     Each name gets a JetStream-enabled account of that name: the
+#     callout's AccountForNamespace rule (a namespace and its account are
+#     the same name), so the list is the callout's `projectAccounts` too.
+#   identities:                       # optional: client-certificate users
+#     - account: <one of accounts>
+#       spiffeId: spiffe://<trust domain>/ns/<ns>/sa/<sa>
+#       publish: [subject, ...]       # the exact subjects it may publish
+#     When any is given: the client port also speaks TLS (`allow_non_tls`
+#     keeps the plaintext path, so token clients are unaffected), a TLS
+#     client must present a certificate that chains to `clientCA` and
+#     nothing else, its URI SAN is mapped to the user above
+#     (`verify_and_map`), and each mapped user is exempt from the callout.
+#     The only subscribe a mapped user gets is the reply inbox JetStream
+#     publish acknowledgements come back on.
+#   clientCA:                         # with identities
+#     configMapName: <ConfigMap holding the CA bundle, in the release namespace>
+#     key: <key in it>
+#   serverCertificate:                # with identities: a cert-manager Certificate
+#     dnsName: nats.<zone>            # for the broker's server certificate
+#     issuerRef: {name: <issuer>, kind: ClusterIssuer, group: cert-manager.io}
+#     leafKeySize: 384                # ECDSA key size
+#     secretName: nats-server-tls     # optional
+#     duration: 2160h                 # optional
+#     renewBefore: 720h               # optional
+#     annotations: {}                 # optional, on the Certificate
+#
+# With NO `global.tenancy.authCallout` this preset must not be used: it
+# renders an `authorization` block, and the preset exists for that block.
+nats:
+  config:
+    nats:
+      tls:
+        _tenancy:
+          $tplYamlSpread: |
+            {{- with .Values.global.tenancy }}
+            {{- if .identities }}
+            enabled: true
+            secretName: {{ dig "serverCertificate" "secretName" "nats-server-tls" . }}
+            merge:
+              ca_file: /etc/nats-ca-cert/{{ .clientCA.key }}
+              verify_and_map: true
+              min_version: "1.3"
+            {{- end }}
+            {{- end }}
+    merge:
+      _tenancy:
+        $tplYamlSpread: |
+          {{- with .Values.global.tenancy }}
+          {{- if .identities }}
+          allow_non_tls: true
+          {{- end }}
+          {{- end }}
+      accounts:
+        _tenancy:
+          $tplYamlSpread: |
+            {{- $t := .Values.global.tenancy }}
+            {{- $out := dict "AUTH" (dict "users" (list (dict "nkey" $t.authCallout.user))) }}
+            {{- range $name := $t.accounts }}
+            {{- $account := dict "jetstream" "enabled" }}
+            {{- $users := list }}
+            {{- range $t.identities }}
+            {{- if eq .account $name }}
+            {{- $users = append $users (dict "user" .spiffeId "permissions" (dict "publish" (dict "allow" (.publish | default list)) "subscribe" (dict "allow" (list "_INBOX.>")))) }}
+            {{- end }}
+            {{- end }}
+            {{- if $users }}{{ $_ := set $account "users" $users }}{{ end }}
+            {{- $_ := set $out $name $account }}
+            {{- end }}
+            {{- toYaml $out }}
+      authorization:
+        _tenancy:
+          $tplYamlSpread: |
+            {{- $t := .Values.global.tenancy }}
+            {{- $users := list $t.authCallout.user }}
+            {{- range $t.identities }}{{ $users = append $users .spiffeId }}{{ end }}
+            auth_callout:
+              issuer: {{ $t.authCallout.issuer | quote }}
+              auth_users: {{ toJson $users }}
+              account: AUTH
+  tlsCA:
+    _tenancy:
+      $tplYamlSpread: |
+        {{- with .Values.global.tenancy }}
+        {{- if .identities }}
+        enabled: true
+        configMapName: {{ .clientCA.configMapName }}
+        key: {{ .clientCA.key }}
+        {{- end }}
+        {{- end }}
+  extraResources:
+    - $tplYamlSpread: |
+        {{- with .Values.global.tenancy }}
+        {{- if .identities }}
+        {{- $c := .serverCertificate }}
+        - apiVersion: cert-manager.io/v1
+          kind: Certificate
+          metadata:
+            name: {{ $c.secretName | default "nats-server-tls" }}
+            {{- with $c.annotations }}
+            annotations: {{ toJson . }}
+            {{- end }}
+          spec:
+            secretName: {{ $c.secretName | default "nats-server-tls" }}
+            dnsNames:
+              - {{ $c.dnsName | quote }}
+            duration: {{ $c.duration | default "2160h" }}
+            renewBefore: {{ $c.renewBefore | default "720h" }}
+            privateKey:
+              algorithm: ECDSA
+              size: {{ $c.leafKeySize }}
+              rotationPolicy: Always
+            issuerRef: {{ toJson $c.issuerRef }}
+        {{- end }}
+        {{- end }}

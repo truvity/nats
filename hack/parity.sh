@@ -42,6 +42,7 @@ key=nats
 fail=0
 n=0
 alerts_n=0
+own_n=0
 upstream="$(ls "$root"/charts/"$chart"/charts/"$key"-*.tgz)"
 
 strip() { grep -v '^# Source:' || true; }
@@ -74,30 +75,38 @@ for values in "$root"/tests/cases/"$chart"/*/values.yaml; do
   helm template "$release" "$upstream" --namespace "$ns" -f "$tmp/flat.yaml" | strip > "$tmp/upstream.yaml"
 
   alerts_on="$(yq '.alerts.enabled // false' "$tmp/merged.yaml")"
+  own_on="$(yq '(.alerts.enabled // false) or (.networkPolicy.enabled // false) or (.janitor.enabled // false)' "$tmp/merged.yaml")"
   n=$((n + 1))
 
-  if [ "$alerts_on" = true ]; then
-    alerts_n=$((alerts_n + 1))
+  if [ "$own_on" = true ]; then
+    own_n=$((own_n + 1))
     helm template "$release" "$root/charts/$chart" --namespace "$ns" "${args[@]}" \
-      --set alerts.enabled=false | strip > "$tmp/wrapped.yaml"
+      --set alerts.enabled=false --set networkPolicy.enabled=false --set janitor.enabled=false | strip > "$tmp/wrapped.yaml"
     helm template "$release" "$root/charts/$chart" --namespace "$ns" "${args[@]}" | strip > "$tmp/with-alerts.yaml"
-    # Turning the alerts on only ADDS: no line of the other objects moves.
+    # Turning the chart's own objects on only ADDS: no line of the other objects moves.
     if diff "$tmp/wrapped.yaml" "$tmp/with-alerts.yaml" | grep -q '^<'; then
-      echo "PARITY BROKEN: $chart/$case_name — alerts.enabled=true changed an object other than the rule object:" >&2
+      echo "PARITY BROKEN: $chart/$case_name — turning the chart's own objects on changed an object other than theirs:" >&2
       diff -u "$tmp/wrapped.yaml" "$tmp/with-alerts.yaml" | grep -E '^-[^-]' | head -20 >&2
       fail=1
     fi
-    # And what it adds is one object, of the kind alerts.kind names.
+  fi
+  if [ "$alerts_on" = true ]; then
+    alerts_n=$((alerts_n + 1))
+    # And what the alerts add is one object, of the kind alerts.kind names.
     kind="$(yq '.alerts.kind // "VMRule"' "$tmp/merged.yaml")"
     before="$(grep -c "^kind: $kind\$" "$tmp/wrapped.yaml" || true)"
     after="$(grep -c "^kind: $kind\$" "$tmp/with-alerts.yaml" || true)"
     total_before="$(grep -c '^kind: ' "$tmp/wrapped.yaml" || true)"
     total_after="$(grep -c '^kind: ' "$tmp/with-alerts.yaml" || true)"
-    if [ $((after - before)) != 1 ] || [ $((total_after - total_before)) != 1 ]; then
+    # (A case that also turns on the policies or the janitor adds more objects,
+    # so the count is only held where the rules are the only extra.)
+    others_on="$(yq '(.networkPolicy.enabled // false) or (.janitor.enabled // false)' "$tmp/merged.yaml")"
+    if [ "$others_on" = false ] && { [ $((after - before)) != 1 ] || [ $((total_after - total_before)) != 1 ]; }; then
       echo "PARITY BROKEN: $chart/$case_name — alerts.enabled=true must add exactly one $kind and nothing else" >&2
       fail=1
     fi
-  else
+  fi
+  if [ "$own_on" != true ]; then
     helm template "$release" "$root/charts/$chart" --namespace "$ns" "${args[@]}" | strip > "$tmp/wrapped.yaml"
   fi
 
@@ -109,5 +118,5 @@ for values in "$root"/tests/cases/"$chart"/*/values.yaml; do
   rm -rf "$tmp"
 done
 
-[ "$fail" = 0 ] && echo "parity: $n cases render the same objects through the wrapper as through the upstream chart ($alerts_n of them with the alerts on: one added rule object, nothing else moved)"
+[ "$fail" = 0 ] && echo "parity: $n cases render the same objects through the wrapper as through the upstream chart ($own_n of them with the chart's own objects on: only added, nothing else moved)"
 exit $fail

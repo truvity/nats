@@ -1,0 +1,34 @@
+# The brokers' NetworkPolicy with the NACK controller's, and the janitor.
+networkPolicy:
+  enabled: true
+  annotations:
+    example.com/wave: "15"
+  metricsFrom:
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: monitoring
+    podSelector:
+      matchLabels:
+        app.kubernetes.io/name: agent
+  dns:
+    namespaceSelector:
+      matchLabels:
+        example.com/resolver: "true"
+    cidrs:
+      - 10.100.0.0/16
+      - 10.0.0.0/16
+  apiServerCIDRs:
+    - 10.0.0.0/16
+    - 10.100.0.0/16
+  nack:
+    enabled: true
+janitor:
+  enabled: true
+  image: registry.example/kubectl:1.34.2
+  annotations:
+    example.com/wave: "80"
+  nodeSelector:
+    kubernetes.io/arch: arm64
+  tolerations:
+    - key: arch
+      operator: Exists

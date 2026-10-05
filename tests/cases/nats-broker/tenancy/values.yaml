@@ -1,0 +1,10 @@
+# Per-tenant accounts and the auth callout, from rows: the tenancy preset.
+global:
+  tenancy:
+    authCallout:
+      issuer: AEXAMPLEISSUERKEYEXAMPLEISSUERKEYEXAMPLEISSUERKEYEXAMPLEISSUERKEXX
+      user: UEXAMPLEUSERKEYEXAMPLEUSERKEYEXAMPLEUSERKEYEXAMPLEUSERKEYEXAMPLE
+    accounts:
+      - tenant-a
+      - tenant-b
+      - ci

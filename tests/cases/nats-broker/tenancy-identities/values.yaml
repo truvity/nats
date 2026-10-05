@@ -1,0 +1,27 @@
+# The tenancy preset with client-certificate identities: TLS beside the
+# plaintext path, a mapped user in its account, the server certificate.
+global:
+  tenancy:
+    authCallout:
+      issuer: AEXAMPLEISSUERKEYEXAMPLEISSUERKEYEXAMPLEISSUERKEYEXAMPLEISSUERKEXX
+      user: UEXAMPLEUSERKEYEXAMPLEUSERKEYEXAMPLEUSERKEYEXAMPLEUSERKEYEXAMPLE
+    accounts:
+      - tenant-a
+      - tenant-b
+    identities:
+      - account: tenant-a
+        spiffeId: spiffe://trust.example/ns/tenant-a/sa/events
+        publish:
+          - tenant-a.events.>
+    clientCA:
+      configMapName: identity-ca
+      key: identity-ca.pem
+    serverCertificate:
+      dnsName: nats.example.private
+      leafKeySize: 384
+      issuerRef:
+        name: example-private
+        kind: ClusterIssuer
+        group: cert-manager.io
+      annotations:
+        argocd.argoproj.io/sync-wave: "-1"
