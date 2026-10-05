@@ -5,7 +5,7 @@ heading here is a patch cut automatically for dependency bumps alone; its
 GitHub Release lists them. The chart and the image are released together
 at every version.
 
-## Unreleased
+## v1.4.0
 
 - **`nats-broker`: the `tenancy` preset.** Per-tenant accounts, the auth
   callout and, optionally, client-certificate identities (TLS beside the
