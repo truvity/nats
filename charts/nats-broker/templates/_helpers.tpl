@@ -106,3 +106,26 @@ about; empty for the whole-store alert, whose result has no cluster label.
 {{- define "nats-broker.alerts.onCluster" -}}
 {{- if .Values.alerts.clusterLabel -}}{{ printf "{{ with $labels.%s }} on cluster {{ . }}{{ end }}" .Values.alerts.clusterLabel }}{{- end -}}
 {{- end -}}
+
+{{/*
+Labels of the objects this chart templates itself (the network policies and
+the janitor), as opposed to the upstream chart's.
+*/}}
+{{- define "nats-broker.own.labels" -}}
+app.kubernetes.io/name: {{ .name }}
+app.kubernetes.io/part-of: nats
+{{- end -}}
+
+{{/*
+A NetworkPolicy `to:` list: an optional namespace selector, then one ipBlock
+per CIDR.
+*/}}
+{{- define "nats-broker.np.to" -}}
+{{- with .selector }}
+- namespaceSelector: {{ toJson . }}
+{{- end }}
+{{- range .cidrs }}
+- ipBlock:
+    cidr: {{ . | quote }}
+{{- end }}
+{{- end -}}

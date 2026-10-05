@@ -5,6 +5,18 @@ heading here is a patch cut automatically for dependency bumps alone; its
 GitHub Release lists them. The chart and the image are released together
 at every version.
 
+## Unreleased
+
+- **`nats-broker`: the `tenancy` preset.** Per-tenant accounts, the auth
+  callout and, optionally, client-certificate identities (TLS beside the
+  plaintext path, a mapped user per SPIFFE ID, the broker's server
+  Certificate), from rows under `global.tenancy`. Values only: it uses the
+  upstream chart's `$tplYamlSpread`, so the parity gate holds it
+  (`docs/broker.md`, "Tenancy").
+- **`nats-broker`: opt-in `networkPolicy` and `janitor`.** The brokers' and
+  NACK's NetworkPolicies, and the NACK Errored-CR janitor, moved here from an
+  estate. Off by default: with neither set the render is unchanged.
+
 ## v1.3.2
 
 - Dependency updates.

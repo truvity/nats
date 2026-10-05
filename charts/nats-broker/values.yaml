@@ -144,3 +144,57 @@ alerts:
   # applied to NATSMetricsAbsent, which always keeps its own cluster label
   # (`absentLookback`).
   keepClusterLabel: false
+
+# -- OPT-IN NetworkPolicy for the brokers (and the NACK controller). Off:
+# nothing is rendered. See templates/network-policy.yaml for the flows.
+networkPolicy:
+  enabled: false
+  # -- The brokers' policy name.
+  name: nats
+  # -- The brokers' `app.kubernetes.io/name` label, which the policy selects
+  # and admits (the upstream chart's default).
+  brokerName: nats
+  # -- Annotations on every policy (a sync wave, say).
+  annotations: {}
+  # -- Who may scrape the exporter on 7777: a `from` entry (a
+  # namespaceSelector and/or podSelector). Empty leaves the port closed.
+  metricsFrom: {}
+  dns:
+    # -- Selects the namespace of a cluster resolver that has no Service
+    # object (so the CIDRs cannot cover it). Empty leaves it out.
+    namespaceSelector: {}
+    # -- The resolver's addresses: the service CIDR and the VPC CIDR, since a
+    # policy agent sees the pre-DNAT address.
+    cidrs: []
+  # -- The kube-apiserver's addresses, for the NACK policy (the same two
+  # CIDRs as `dns.cidrs`, for the same reason).
+  apiServerCIDRs: []
+  nack:
+    # -- Also render the NACK controller's policy: egress to the brokers,
+    # the API server and DNS.
+    enabled: false
+    name: nack
+    podLabelKey: app
+    podLabelValue: nack
+
+# -- OPT-IN NACK Errored-CR janitor (a CronJob and its RBAC). Off: nothing is
+# rendered. See templates/janitor.yaml.
+janitor:
+  enabled: false
+  name: nack-janitor
+  # -- An image with kubectl and a POSIX shell. Required when enabled: an
+  # estate pulls through its own registry.
+  image: ""
+  schedule: "*/10 * * * *"
+  # -- How long a CR must have been Errored before it is deleted.
+  errorAfterSeconds: 300
+  # -- Annotations on every object (a sync wave, say).
+  annotations: {}
+  nodeSelector: {}
+  tolerations: []
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 64Mi

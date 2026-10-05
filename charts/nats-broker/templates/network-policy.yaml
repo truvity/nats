@@ -1,0 +1,112 @@
+{{- /*
+NetworkPolicy for the brokers and, optionally, the NACK controller:
+opt-in (`networkPolicy.enabled`, off by default, so a release that does not
+ask for it renders what the upstream chart does).
+
+Selecting the brokers flips them to default-deny per direction, so every
+flow below is deliberate: clients on 4222 from anywhere in the cluster (the
+auth callout is the tenancy boundary, not the network), broker-to-broker
+routes on 6222, and, when `networkPolicy.metricsFrom` names a scraper, the
+exporter on 7777. nats-box carries the brokers' name label and rides the same
+policy. Egress is the routes and clients between the nats-labelled pods, and
+DNS.
+
+DNS and the API server are CIDR-shaped on purpose. The cluster resolver and
+the kubernetes.default ClusterIP are not pod-backed, so a policy agent
+evaluates the PRE-DNAT service address: both the service CIDR and the VPC
+CIDR are needed, and a selector cannot cover them.
+*/ -}}
+{{- if .Values.networkPolicy.enabled -}}
+{{- $np := .Values.networkPolicy -}}
+{{- $ns := include "nats-broker.namespace" . -}}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $np.name }}
+  namespace: {{ $ns }}
+  {{- with $np.annotations }}
+  annotations: {{ toJson . }}
+  {{- end }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: {{ $np.brokerName }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - port: 4222
+          protocol: TCP
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: {{ $np.brokerName }}
+      ports:
+        - port: 6222
+          protocol: TCP
+    {{- with $np.metricsFrom }}
+    - from:
+        - {{ toJson . }}
+      ports:
+        - port: 7777
+          protocol: TCP
+    {{- end }}
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: {{ $np.brokerName }}
+      ports:
+        - port: 6222
+          protocol: TCP
+        - port: 4222
+          protocol: TCP
+    - to:
+        {{- include "nats-broker.np.to" (dict "selector" $np.dns.namespaceSelector "cidrs" $np.dns.cidrs) | nindent 8 }}
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+{{- if $np.nack.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $np.nack.name }}
+  namespace: {{ $ns }}
+  {{- with $np.annotations }}
+  annotations: {{ toJson . }}
+  {{- end }}
+spec:
+  podSelector:
+    matchLabels:
+      {{ $np.nack.podLabelKey }}: {{ $np.nack.podLabelValue }}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: {{ $np.brokerName }}
+      ports:
+        - port: 4222
+          protocol: TCP
+    - to:
+        {{- include "nats-broker.np.to" (dict "cidrs" $np.apiServerCIDRs) | nindent 8 }}
+      ports:
+        - port: 443
+          protocol: TCP
+    - to:
+        {{- include "nats-broker.np.to" (dict "selector" $np.dns.namespaceSelector "cidrs" $np.dns.cidrs) | nindent 8 }}
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+{{- end }}
+{{- end -}}

@@ -1,0 +1,114 @@
+{{- /*
+The NACK Errored-CR janitor: opt-in (`janitor.enabled`, off by default).
+
+NACK leaves Stream and Consumer custom resources in a TERMINAL Errored state
+after a broker-side rejection (an authorisation violation, a config-reload
+window), and nothing requeues them once the cause is fixed. This CronJob
+deletes those that have been Errored for more than `janitor.errorAfterSeconds`;
+whatever owns them (a GitOps controller's self-heal, the install's next sync)
+recreates them against the healthy broker. A healthy or freshly Errored one is
+never touched. The script is files/nack-janitor.sh.
+
+It needs the NACK CRDs and a ClusterRole (get, list, delete on both kinds, in
+every namespace), so it is not part of a broker that runs without NACK.
+*/ -}}
+{{- if .Values.janitor.enabled -}}
+{{- $j := .Values.janitor -}}
+{{- $ns := include "nats-broker.namespace" . -}}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $j.name }}
+  namespace: {{ $ns }}
+  labels:
+    {{- include "nats-broker.own.labels" (dict "name" $j.name) | nindent 4 }}
+  {{- with $j.annotations }}
+  annotations: {{ toJson . }}
+  {{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ $j.name }}
+  labels:
+    app.kubernetes.io/name: {{ $j.name }}
+  {{- with $j.annotations }}
+  annotations: {{ toJson . }}
+  {{- end }}
+rules:
+  - apiGroups: [jetstream.nats.io]
+    resources: [streams, consumers]
+    verbs: [get, list, delete]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ $j.name }}
+  labels:
+    app.kubernetes.io/name: {{ $j.name }}
+  {{- with $j.annotations }}
+  annotations: {{ toJson . }}
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ $j.name }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ $j.name }}
+    namespace: {{ $ns }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ $j.name }}
+  namespace: {{ $ns }}
+  labels:
+    {{- include "nats-broker.own.labels" (dict "name" $j.name) | nindent 4 }}
+  {{- with $j.annotations }}
+  annotations: {{ toJson . }}
+  {{- end }}
+spec:
+  schedule: {{ $j.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 300
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: {{ $j.name }}
+        spec:
+          serviceAccountName: {{ $j.name }}
+          restartPolicy: Never
+          {{- with $j.nodeSelector }}
+          nodeSelector: {{ toJson . }}
+          {{- end }}
+          {{- with $j.tolerations }}
+          tolerations: {{ toJson . }}
+          {{- end }}
+          containers:
+            - name: janitor
+              image: {{ required "janitor.image is required (an image with kubectl and a POSIX shell)" $j.image }}
+              command:
+                - /bin/sh
+                - -ec
+                - |
+                  errored_after={{ int $j.errorAfterSeconds }}
+                  {{- .Files.Get "files/nack-janitor.sh" | replace "-gt 300" "-gt $errored_after" | nindent 18 }}
+              resources: {{ toJson $j.resources }}
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                runAsNonRoot: true
+                runAsUser: 65534
+                capabilities:
+                  drop:
+                    - ALL
+                seccompProfile:
+                  type: RuntimeDefault
+{{- end -}}

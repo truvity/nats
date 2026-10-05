@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "nats-broker values",
-  "description": "The upstream nats chart's values go under `nats`; this chart's own are `alerts`. An unknown top-level key is refused, and in particular upstream values pasted at the root of the file, which would otherwise be ignored and install the defaults.",
+  "description": "The upstream nats chart's values go under `nats`; this chart's own are `alerts`, `networkPolicy` and `janitor`. An unknown top-level key is refused, and in particular upstream values pasted at the root of the file, which would otherwise be ignored and install the defaults.",
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -18,62 +18,262 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "enabled": { "type": "boolean" },
-        "kind": { "type": "string", "enum": ["VMRule", "PrometheusRule"] },
-        "name": { "type": "string" },
-        "namespace": { "type": "string" },
-        "ruleLabels": { "type": "object", "additionalProperties": { "type": "string" } },
-        "annotations": { "type": "object", "additionalProperties": { "type": "string" } },
-        "groupName": { "type": "string", "minLength": 1 },
-        "interval": { "$ref": "#/definitions/duration" },
-        "commonLabels": { "type": "object", "additionalProperties": { "type": "string" } },
-        "runbookBaseUrl": { "type": "string" },
-        "clusterLabel": { "type": "string", "pattern": "^([a-zA-Z_][a-zA-Z0-9_]*)?$" },
-        "ownerLabel": { "type": "string", "pattern": "^([a-zA-Z_][a-zA-Z0-9_]*)?$" },
-        "absentLookback": { "$ref": "#/definitions/duration" },
-        "job": { "type": "string" },
-        "severity": { "type": "string", "minLength": 1 },
-        "warningSeverity": { "type": "string", "minLength": 1 },
-        "brokerDownFor": { "$ref": "#/definitions/duration" },
-        "routesFor": { "$ref": "#/definitions/duration" },
-        "leaderFor": { "$ref": "#/definitions/duration" },
+        "enabled": {
+          "type": "boolean"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "VMRule",
+            "PrometheusRule"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "namespace": {
+          "type": "string"
+        },
+        "ruleLabels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "groupName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "interval": {
+          "$ref": "#/definitions/duration"
+        },
+        "commonLabels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "runbookBaseUrl": {
+          "type": "string"
+        },
+        "clusterLabel": {
+          "type": "string",
+          "pattern": "^([a-zA-Z_][a-zA-Z0-9_]*)?$"
+        },
+        "ownerLabel": {
+          "type": "string",
+          "pattern": "^([a-zA-Z_][a-zA-Z0-9_]*)?$"
+        },
+        "absentLookback": {
+          "$ref": "#/definitions/duration"
+        },
+        "job": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "warningSeverity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "brokerDownFor": {
+          "$ref": "#/definitions/duration"
+        },
+        "routesFor": {
+          "$ref": "#/definitions/duration"
+        },
+        "leaderFor": {
+          "$ref": "#/definitions/duration"
+        },
         "backlog": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "window": { "$ref": "#/definitions/duration" },
-            "minPending": { "type": "integer", "minimum": 0 },
-            "for": { "$ref": "#/definitions/duration" }
+            "window": {
+              "$ref": "#/definitions/duration"
+            },
+            "minPending": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "for": {
+              "$ref": "#/definitions/duration"
+            }
           }
         },
         "slowConsumers": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "window": { "$ref": "#/definitions/duration" },
-            "for": { "$ref": "#/definitions/duration" }
+            "window": {
+              "$ref": "#/definitions/duration"
+            },
+            "for": {
+              "$ref": "#/definitions/duration"
+            }
           }
         },
         "storage": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "ratio": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
-            "for": { "$ref": "#/definitions/duration" }
+            "ratio": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1
+            },
+            "for": {
+              "$ref": "#/definitions/duration"
+            }
           }
         },
         "memory": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "namespace": { "type": "string" },
-            "container": { "type": "string", "minLength": 1 },
-            "ratio": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
-            "for": { "$ref": "#/definitions/duration" }
+            "namespace": {
+              "type": "string"
+            },
+            "container": {
+              "type": "string",
+              "minLength": 1
+            },
+            "ratio": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1
+            },
+            "for": {
+              "$ref": "#/definitions/duration"
+            }
           }
         },
-        "absentFor": { "$ref": "#/definitions/duration" },
-        "keepClusterLabel": { "type": "boolean" }
+        "absentFor": {
+          "$ref": "#/definitions/duration"
+        },
+        "keepClusterLabel": {
+          "type": "boolean"
+        }
+      }
+    },
+    "networkPolicy": {
+      "description": "Opt-in NetworkPolicy for the brokers and NACK.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "brokerName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "metricsFrom": {
+          "type": "object"
+        },
+        "dns": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "namespaceSelector": {
+              "type": "object"
+            },
+            "cidrs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "apiServerCIDRs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "nack": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "podLabelKey": {
+              "type": "string",
+              "minLength": 1
+            },
+            "podLabelValue": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "janitor": {
+      "description": "Opt-in NACK Errored-CR janitor.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "image": {
+          "type": "string"
+        },
+        "schedule": {
+          "type": "string",
+          "minLength": 1
+        },
+        "errorAfterSeconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "nodeSelector": {
+          "type": "object"
+        },
+        "tolerations": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "resources": {
+          "type": "object"
+        }
       }
     }
   },
