@@ -1,6 +1,12 @@
-# nats-auth-callout
+# nats
 
-Workload identity for NATS on Kubernetes: an auth-callout responder
+NATS on Kubernetes, in two Helm charts: `nats-auth-callout`, the workload-identity
+auth-callout responder, and `nats-broker`, a pinned wrapper over the upstream
+broker chart.
+
+## The auth-callout responder
+
+The `nats-auth-callout` component is an auth-callout responder
 that validates a connecting client's ServiceAccount token via
 TokenReview and answers the broker with a signed user JWT that places
 the client into the NATS account named after its namespace. No
@@ -22,7 +28,7 @@ TokenReview needs only the built-in `system:auth-delegator` grant.
 
 ## The broker chart
 
-This repository also publishes `nats-broker`: the upstream `nats` chart,
+This repository also publishes the `nats-broker` chart: the upstream `nats` chart,
 pinned and vendored, that renders **exactly what the upstream chart
 renders** unless asked otherwise, with opt-in presets (restricted Pod
 Security, metrics, a JetStream cluster, spreading) and opt-in alert rules.
@@ -45,7 +51,7 @@ the broker's configuration.
 client pod (namespace my-namespace)
   │  CONNECT auth_token = projected ServiceAccount token (audience nats)
   ▼
-NATS broker ── $SYS.REQ.USER.AUTH ──► responder (this chart)
+NATS broker ── $SYS.REQ.USER.AUTH ──► responder (nats-auth-callout)
   ▲                                     │ TokenReview ──► API server
   │                                     │ system:serviceaccount:my-namespace:<name>
   └── signed user JWT, account my-namespace ◄──┘
