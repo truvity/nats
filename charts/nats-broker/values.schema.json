@@ -11,7 +11,47 @@
     },
     "global": {
       "description": "Shared with the upstream chart as its own `global`.",
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "tenancy": {
+          "description": "Inputs of presets/tenancy.yaml. Only the client-certificate identities are checked here: each is one NATS user mapped from a workload certificate's SPIFFE ID, allowed to publish exactly the concrete subjects it names.",
+          "type": "object",
+          "properties": {
+            "identities": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "account",
+                  "spiffeId",
+                  "publish"
+                ],
+                "properties": {
+                  "account": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "spiffeId": {
+                    "type": "string",
+                    "pattern": "^spiffe://[^/\\s]+/ns/[a-z0-9]([-a-z0-9]*[a-z0-9])?/sa/[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+                    "description": "spiffe://<trust domain>/ns/<namespace>/sa/<ServiceAccount>, the shape the broker maps a certificate by."
+                  },
+                  "publish": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*$",
+                      "description": "A concrete subject: no wildcard, no empty token, no whitespace."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "alerts": {
       "description": "Opt-in alert rules for the broker's metrics.",

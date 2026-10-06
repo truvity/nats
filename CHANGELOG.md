@@ -5,7 +5,9 @@ heading here is a patch cut automatically for dependency bumps alone; its
 GitHub Release lists them. The chart and the image are released together
 at every version.
 
-## Unreleased
+## v1.6.0
+
+- **`pkg/tenancy` (new Go package) and a values schema for `global.tenancy.identities`.** `tenancy.Identities` maps a project's account, the environment's trust domain, its ServiceAccounts and the subjects they may publish to the preset's `identities` rows (`transport.SpiffeID` builds the ID), and `tenancy.ValidateClient` holds a deployment's catalogue to the rules the identities exist under. The chart's values schema now checks each `global.tenancy.identities` row: `spiffeId` is `spiffe://<trust domain>/ns/<namespace>/sa/<ServiceAccount>`, and `publish` is a non-empty, unique list of **concrete** subjects. **A wildcard in `publish` is now refused** (the preset's own comment always said the exact subjects): an identity exists to do one job, and a wildcard hands it the stream's whole subject space. The preset's templates and every render of a valid input are unchanged.
 
 - **Internal:** the zero-diff gate (`hack/parity.sh`) is now a Go test, `tests/proof`, built on the shared `parity.Wrapper` of `github.com/truvity/cd/parity` instead of a private shell copy. Same cases, same verdict; no chart changes, no render changes.
 

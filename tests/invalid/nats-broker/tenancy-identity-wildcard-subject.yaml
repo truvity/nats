@@ -1,0 +1,6 @@
+global:
+  tenancy:
+    identities:
+      - account: shop
+        spiffeId: spiffe://env.example.internal/ns/shop/sa/api
+        publish: ["shop.>"]
