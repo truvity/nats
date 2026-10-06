@@ -1,0 +1,4 @@
+# One project account with the defaults.
+servers: ["nats://nats.nats.svc:4222"]
+projects:
+  - name: shop

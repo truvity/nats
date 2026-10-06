@@ -4,7 +4,7 @@
 # Disable go.work (parent workspace interferes with standalone module builds)
 export GOWORK := "off"
 
-charts := "nats-auth-callout nats-broker"
+charts := "nats-auth-callout nats-broker nats-projects"
 
 # Format all Go files (gofmt + goimports via golangci-lint)
 fmt:

@@ -220,3 +220,15 @@ heading.
 ## Licence
 
 MIT — see [LICENSE](LICENSE).
+
+## nats-projects
+
+`charts/nats-projects` renders the NATS account of every project namespace
+from a list of rows (`projects: [{name, labels}]`): the ServiceAccount NACK
+presents, its long-lived token Secret and the NACK `Account` named after the
+namespace. It is the shape of an L3 `-projects` Application: one release for
+every project of a cluster. Give the broker's tenancy preset
+(`global.tenancy.accounts`) and the callout (`projectAccounts`) the same names.
+Accounts carry `Prune=false,Delete=false` (`protectAccounts`), so the
+Application can prune the rest.
+

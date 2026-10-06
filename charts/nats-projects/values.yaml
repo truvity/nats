@@ -1,0 +1,34 @@
+# Nothing here names an estate. The render produces nothing until a row is
+# listed.
+
+# The broker's client URLs NACK dials. Required once a row is listed.
+servers: []
+
+# The ServiceAccount NACK presents in each namespace, the long-lived token
+# Secret the API server fills for it, and the key the Account reads.
+serviceAccount: nack
+tokenSecret: nack-nats-token
+tokenKey: token
+
+# Labels on every object (merged under a row's own `labels`).
+labels:
+  app.kubernetes.io/name: nack
+  app.kubernetes.io/part-of: nats
+
+# The Account binds the namespace to its account on the broker: its streams
+# live there. It carries argocd.argoproj.io/sync-options:
+# Prune=false,Delete=false (and, with helmKeep, helm.sh/resource-policy:
+# keep), so removing a row never deletes it; the ServiceAccount and the token
+# Secret are recreated by the next render and stay prunable.
+protectAccounts: true
+helmKeep: false
+
+# Argo CD sync wave of every object; null renders none.
+syncWave: null
+
+# One per project namespace with a NATS account:
+#
+#   projects:
+#     - name: shop                      # the namespace, and the account
+#       labels: {example.com/project: shop}
+projects: []

@@ -1,0 +1,107 @@
+---
+# Source: nats-projects/templates/accounts.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nack
+  namespace: shop
+  labels:
+    app.kubernetes.io/name: nack
+    app.kubernetes.io/part-of: nats
+    example.com/project: shop
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+
+---
+# Source: nats-projects/templates/accounts.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nack
+  namespace: sandbox-alice
+  labels:
+    app.kubernetes.io/name: nack
+    app.kubernetes.io/part-of: nats
+    example.com/tier: employee
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+
+---
+# Source: nats-projects/templates/accounts.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nack-nats-token
+  namespace: shop
+  labels:
+    app.kubernetes.io/name: nack
+    app.kubernetes.io/part-of: nats
+    example.com/project: shop
+  annotations:
+    kubernetes.io/service-account.name: nack
+    argocd.argoproj.io/sync-wave: "20"
+type: kubernetes.io/service-account-token
+
+---
+# Source: nats-projects/templates/accounts.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nack-nats-token
+  namespace: sandbox-alice
+  labels:
+    app.kubernetes.io/name: nack
+    app.kubernetes.io/part-of: nats
+    example.com/tier: employee
+  annotations:
+    kubernetes.io/service-account.name: nack
+    argocd.argoproj.io/sync-wave: "20"
+type: kubernetes.io/service-account-token
+
+---
+# Source: nats-projects/templates/accounts.yaml
+apiVersion: jetstream.nats.io/v1beta2
+kind: Account
+metadata:
+  name: shop
+  namespace: shop
+  labels:
+    app.kubernetes.io/name: nack
+    app.kubernetes.io/part-of: nats
+    example.com/project: shop
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    helm.sh/resource-policy: keep
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  name: shop
+  servers:
+    - nats://nats.nats.svc.cluster.example:4222
+  token:
+    secret:
+      name: nack-nats-token
+    token: token
+
+---
+# Source: nats-projects/templates/accounts.yaml
+apiVersion: jetstream.nats.io/v1beta2
+kind: Account
+metadata:
+  name: sandbox-alice
+  namespace: sandbox-alice
+  labels:
+    app.kubernetes.io/name: nack
+    app.kubernetes.io/part-of: nats
+    example.com/tier: employee
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    helm.sh/resource-policy: keep
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  name: sandbox-alice
+  servers:
+    - nats://nats.nats.svc.cluster.example:4222
+  token:
+    secret:
+      name: nack-nats-token
+    token: token

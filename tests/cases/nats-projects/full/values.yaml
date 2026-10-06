@@ -1,0 +1,9 @@
+# Two accounts, a sync wave, per-row labels, helmKeep.
+servers: ["nats://nats.nats.svc.cluster.example:4222"]
+syncWave: 20
+helmKeep: true
+projects:
+  - name: shop
+    labels: {example.com/project: shop}
+  - name: sandbox-alice
+    labels: {example.com/tier: employee}
