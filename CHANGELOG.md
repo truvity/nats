@@ -7,6 +7,8 @@ at every version.
 
 ## Unreleased
 
+## v1.5.0
+
 - **`nats-projects`, a new chart.** The NATS account of every project
   namespace from a list of project rows, for an L3 `-projects` Application:
   per row the ServiceAccount NACK presents, its token Secret and the NACK
