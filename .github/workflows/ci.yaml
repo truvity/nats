@@ -33,13 +33,14 @@ jobs:
       policy-conformance-strict: true
       #
       # The clients-* recipes are the client adapters (clients/): the TypeScript
-      # lint/types/unit/build, and each language's conformance suite against a
+      # lint/types/unit/build, the Kotlin and Python build/unit tests/release
+      # dry runs, and each language's conformance suite against a
       # real broker with the auth callout, started by the recipe itself (hosted
       # runner, docker, digest-pinned image, certificates generated per run).
       # The conformance recipes are CI-only: `just check` stays free of docker.
       # Each fails unless every case in clients/conformance/cases.txt ran and
       # passed.
-      recipes: '["build","lint","test","leak-canary","clients-ts","clients-go-conformance","clients-ts-conformance"]'
+      recipes: '["build","lint","test","leak-canary","clients-ts","clients-kotlin","clients-python","clients-go-conformance","clients-ts-conformance","clients-kotlin-conformance","clients-python-conformance"]'
 
   # The race detector is the one thing here that needs a C toolchain, and
   # everything else builds with cgo off — which is what makes the binary

@@ -149,6 +149,55 @@ clients-ts-conformance:
     (cd clients/ts && npm ci --no-audit --no-fund && NATS_CLIENTS=required npx vitest run test/conformance.test.ts --reporter=json --outputFile="$out") || { cat "$out" >&2; exit 1; }
     clients/conformance/guard.sh ts "$out"
 
+# The Kotlin client adapter (clients/kotlin): compile and unit tests, then the
+# dry run of what a release publishes (the jar and the sources jar, no deploy).
+# No broker needed; the conformance cases skip here.
+clients-kotlin:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd clients/kotlin
+    mvn -B -ntp clean verify
+    mvn -B -ntp -DskipTests package
+    # The version is stamped from the tag at release time.
+    jar=$(ls target/nats-client-*.jar | grep -v -- '-sources' | head -1)
+    jar tf "$jar" | grep -q 'com/truvity/nats/NatsClient.class'
+    ls target/nats-client-*-sources.jar >/dev/null
+
+# The Python client adapter (clients/python): lint, types, unit tests, then the
+# dry run of what a release attaches to the GitHub release (wheel and sdist).
+# No broker needed; the conformance cases skip here.
+clients-python:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd clients/python
+    uv sync --locked
+    uv run ruff check .
+    uv run ruff format --check .
+    uv run mypy src tests
+    uv run pytest
+    rm -rf dist
+    uv build
+    ls dist/truvity_nats_client-*-py3-none-any.whl dist/truvity_nats_client-*.tar.gz >/dev/null
+
+# The Kotlin client adapter against the same broker and case list.
+clients-kotlin-conformance:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    trap 'clients/conformance/nats-broker.sh down' EXIT
+    eval "$(clients/conformance/nats-broker.sh up)"
+    (cd clients/kotlin && NATS_CLIENTS=required mvn -B -ntp clean test -Dtest=ConformanceTest -Dsurefire.failIfNoSpecifiedTests=true)
+    clients/conformance/guard.sh kotlin clients/kotlin/target/surefire-reports/TEST-com.truvity.nats.ConformanceTest.xml
+
+# The Python client adapter against the same broker and case list.
+clients-python-conformance:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    trap 'clients/conformance/nats-broker.sh down' EXIT
+    eval "$(clients/conformance/nats-broker.sh up)"
+    out="$(mktemp)"
+    (cd clients/python && uv sync --locked && NATS_CLIENTS=required uv run pytest tests/test_conformance.py -q --junitxml="$out") || { cat "$out" >&2; exit 1; }
+    clients/conformance/guard.sh python "$out"
+
 # Run the tests under the race detector. The responder answers callout
 # requests concurrently and shares the broker connection between them, so a
 # data race there would be a wrong answer rather than a crash, and would not
@@ -175,7 +224,7 @@ clean:
     rm -rf bin/ dist/ coverage.out
 
 # Everything CI runs on a pull request.
-check: build lint test leak-canary clients-ts
+check: build lint test leak-canary clients-ts clients-kotlin clients-python
 
 # Build a snapshot release locally (no push, no tag)
 snapshot:

@@ -80,3 +80,72 @@ jobs:
           # The tag is the version; package.json carries 0.0.0.
           npm version "${TAG#v}" --no-git-tag-version --allow-same-version
           npm publish
+
+  # The Kotlin client (clients/kotlin, com.truvity.nats:nats-client) to GitHub
+  # Packages (Maven), at the tag's version. Same shape as the npm job: after the
+  # release job, built and unit-tested here, so the registry holds exactly what
+  # passed. The conformance cases already ran in CI on the tagged commit.
+  maven:
+    needs: release
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: clients/kotlin/pom.xml
+          # Writes ~/.m2/settings.xml with this server id; the pom's
+          # distributionManagement uses the same id.
+          server-id: github
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
+      - name: Build, test and publish
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        working-directory: clients/kotlin
+        run: |
+          set -euo pipefail
+          # The tag is the version; pom.xml carries 0.0.0-SNAPSHOT.
+          mvn -B -ntp versions:set -DnewVersion="${TAG#v}" -DgenerateBackupPoms=false
+          mvn -B -ntp verify
+          mvn -B -ntp deploy -DskipTests
+
+  # The Python client (clients/python, truvity-nats-client): the wheel and the
+  # sdist, attached to the GitHub release of the tag. GitHub Packages has no
+  # Python registry, and release assets of a public repository download without
+  # a token. After the release job, which creates the GitHub release.
+  python:
+    needs: release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.20"
+      - name: Build, test and attach
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        working-directory: clients/python
+        run: |
+          set -euo pipefail
+          uv sync --locked
+          uv run ruff check .
+          uv run mypy src tests
+          uv run pytest
+          # The tag is the version; pyproject.toml carries 0.0.0.
+          uv version --frozen "${TAG#v}"
+          rm -rf dist
+          uv build
+          gh release upload "$TAG" dist/truvity_nats_client-*.whl dist/truvity_nats_client-*.tar.gz --clobber
