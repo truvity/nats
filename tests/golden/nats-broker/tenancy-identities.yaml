@@ -61,7 +61,7 @@ data:
               "permissions": {
                 "publish": {
                   "allow": [
-                    "tenant-a.events.>"
+                    "tenant-a.events.created"
                   ]
                 },
                 "subscribe": {
