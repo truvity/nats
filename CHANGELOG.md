@@ -5,6 +5,10 @@ heading here is a patch cut automatically for dependency bumps alone; its
 GitHub Release lists them. The chart and the image are released together
 at every version.
 
+## v1.8.0
+
+- **Client adapters: Python and Kotlin.** `truvity-nats-client` (nats-py; the wheel and sdist are attached to the GitHub release, GitHub Packages has no Python registry) and `com.truvity.nats:nats-client` (jnats; GitHub Packages, Maven) implement the same contract as the Go and TypeScript adapters and pass the same 19 conformance cases and test vectors against a real broker with the real callout responder (`just clients-python-conformance`, `just clients-kotlin-conformance`; the guard fails the job unless every case ran and passed). The language-specific differences are in each README.
+
 ## v1.7.0
 
 - **Client adapters (`clients/`): Go and TypeScript.** `github.com/truvity/nats/clients/go/natsclient` (in this module) and `@truvity/nats-client` (GitHub Packages) connect an application to the broker with a verified connection always (the server CA file only, the server name from the URL), a workload certificate (SPIFFE URI SAN) or a ServiceAccount token file that is read again for every (re)connect, unlimited reconnect, JetStream stream and consumer defaults, trace headers written lower-case and read case-insensitively, and an orderly drain. One contract ([clients/README.md](clients/README.md)), one case list and one set of test vectors (`AccountForNamespace`, publish subjects) that every language and the callout itself are tested against. The conformance suites run against a real broker with the real callout responder (`just clients-go-conformance`, `just clients-ts-conformance`); a guard fails the job unless every case ran and passed, and certificate and token rotation are proven without restarting the client.

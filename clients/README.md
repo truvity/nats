@@ -11,8 +11,8 @@ drain. One contract, one conformance suite, one implementation per language.
 |---|---|---|---|
 | Go | [`go/`](go/README.md), `github.com/truvity/nats/clients/go/natsclient` | nats.go | available |
 | TypeScript | [`ts/`](ts/README.md), `@truvity/nats-client` | `@nats-io/transport-node`, `@nats-io/jetstream` | available |
-| Python | `python/`, `truvity-nats-client` | nats-py | planned |
-| Kotlin | `kotlin/`, `com.truvity.nats:nats-client` | jnats | planned |
+| Python | [`python/`](python/README.md), `truvity-nats-client` | nats-py | available |
+| Kotlin | [`kotlin/`](kotlin/README.md), `com.truvity.nats:nats-client` | jnats | available |
 
 ## The contract
 
@@ -151,7 +151,11 @@ that and runs them against a real broker with the auth callout:
 ```
 just clients-go-conformance
 just clients-ts-conformance
+just clients-kotlin-conformance
+just clients-python-conformance
 just clients-ts            # lint, types, unit tests, build; no broker
+just clients-kotlin        # build, unit tests, release dry run; no broker
+just clients-python        # lint, types, unit tests, build; no broker
 ```
 
 The conformance tests skip without `NATS_CLIENTS_URL` so that `go test ./...`
@@ -171,8 +175,18 @@ TypeScript package is published to GitHub Packages by a second job in
 `release.yaml` (after the release job succeeds), at the tag without its `v`; CI
 prints `npm pack --dry-run` so a PR shows what would ship.
 
+The Kotlin artifact `com.truvity.nats:nats-client` is published to GitHub
+Packages (Maven, `https://maven.pkg.github.com/truvity/nats`) by a third job in
+`release.yaml`, at the tag without its `v`; CI runs the same build as a dry run
+(`mvn -DskipTests package`).
+
+The Python package `truvity-nats-client` has no registry yet: GitHub Packages
+does not host Python, so a `python` job in `release.yaml` attaches the wheel and
+sdist to the GitHub release of the tag (anonymous download, no token). CI builds
+both files on every PR.
+
 ```
-go get github.com/truvity/nats@v1.7.0     # Go: the tag is the module version
+go get github.com/truvity/nats@v1.8.0     # Go: the tag is the module version
 ```
 
 For `@truvity/nats-client`, point the scope at GitHub Packages in `.npmrc`. The
@@ -186,3 +200,14 @@ token with `read:packages` is always required:
 
 then `npm install @truvity/nats-client`. In GitHub Actions the token is
 `${{ github.token }}` with `packages: read`.
+
+Maven (GitHub Packages wants a token even for public packages): a `<server>` with
+id `github` in `~/.m2/settings.xml` (`${env.GITHUB_TOKEN}` as the password) and
+the repository `https://maven.pkg.github.com/truvity/nats` with the same id in
+the `pom.xml`; see [`kotlin/README.md`](kotlin/README.md).
+
+Python, from the release assets (no token needed):
+
+```
+pip install "truvity-nats-client @ https://github.com/truvity/nats/releases/download/v1.8.0/truvity_nats_client-1.8.0-py3-none-any.whl"
+```
