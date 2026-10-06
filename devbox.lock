@@ -384,6 +384,54 @@
         }
       }
     },
+    "maven@3.9.16": {
+      "last_modified": "2026-10-05T09:07:57Z",
+      "resolved": "github:NixOS/nixpkgs/aa48d347080940b8a2b8d2f48228674e280a3514#maven",
+      "source": "devbox-search",
+      "version": "3.9.16",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/zl0w6r43a4j1hscfbv90njp9pmp7p9a2-maven-3.9.16",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/zl0w6r43a4j1hscfbv90njp9pmp7p9a2-maven-3.9.16"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/m4lbnfzy91rxv4cn116y8m9hv24pcfy5-maven-3.9.16",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/m4lbnfzy91rxv4cn116y8m9hv24pcfy5-maven-3.9.16"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/334davh2hdmg5ma9pxxz5vpz39dji3vs-maven-3.9.16",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/334davh2hdmg5ma9pxxz5vpz39dji3vs-maven-3.9.16"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/k822cf1yqjgjy2p9fi7jk09ykvzq3zm5-maven-3.9.16",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/k822cf1yqjgjy2p9fi7jk09ykvzq3zm5-maven-3.9.16"
+        }
+      }
+    },
     "nodejs@22": {
       "last_modified": "2026-10-05T09:07:57Z",
       "plugin_version": "0.0.5",
@@ -420,6 +468,139 @@
             }
           ],
           "store_path": "/nix/store/qshvhyv92g772jjsm2zrgzxc4ai4iqfx-nodejs-22.23.3"
+        }
+      }
+    },
+    "python@3.14.4": {
+      "last_modified": "2026-06-27T07:37:20Z",
+      "plugin_version": "0.0.5",
+      "resolved": "github:NixOS/nixpkgs/3d46470bb3030020f7e1361f33514854f5bfa86d#python314",
+      "source": "devbox-search",
+      "version": "3.14.4",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/bz7r3a1x3xby7ilac2ngzwr0szf3yzxc-python3-3.14.4",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/bz7r3a1x3xby7ilac2ngzwr0szf3yzxc-python3-3.14.4"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/fj2lkfaqsccpsgwmzrv921asxzsp1iin-python3-3.14.4",
+              "default": true
+            },
+            {
+              "name": "debug",
+              "path": "/nix/store/8sggbkg072yim06lsbggkiwc84z28cj9-python3-3.14.4-debug"
+            }
+          ],
+          "store_path": "/nix/store/fj2lkfaqsccpsgwmzrv921asxzsp1iin-python3-3.14.4"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/dz3vgh7m1dsj9c3ahn1ab6wqpnz9bbww-python3-3.14.4",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/dz3vgh7m1dsj9c3ahn1ab6wqpnz9bbww-python3-3.14.4"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/fk8c5cqd0npblqv1mcd8swhkcbng84qr-python3-3.14.4",
+              "default": true
+            },
+            {
+              "name": "debug",
+              "path": "/nix/store/y6nmlnw8360r8lma5bjnp07vl9r4l07g-python3-3.14.4-debug"
+            }
+          ],
+          "store_path": "/nix/store/fk8c5cqd0npblqv1mcd8swhkcbng84qr-python3-3.14.4"
+        }
+      }
+    },
+    "temurin-bin-21@21.0.12": {
+      "last_modified": "2026-10-05T09:07:57Z",
+      "resolved": "github:NixOS/nixpkgs/aa48d347080940b8a2b8d2f48228674e280a3514#temurin-bin-21",
+      "source": "devbox-search",
+      "version": "21.0.12",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/5m5pxshy61ybm0y7kcakincg8zdchwip-temurin-bin-21.0.12",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/5m5pxshy61ybm0y7kcakincg8zdchwip-temurin-bin-21.0.12"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/rnisaqkmy00rddvj2h1ifa4jhxdpran4-temurin-bin-21.0.12",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/rnisaqkmy00rddvj2h1ifa4jhxdpran4-temurin-bin-21.0.12"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/xqs6d17bnj1i7z1dy9r8laww0l3qmghj-temurin-bin-21.0.12",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/xqs6d17bnj1i7z1dy9r8laww0l3qmghj-temurin-bin-21.0.12"
+        }
+      }
+    },
+    "uv@0.12.17": {
+      "last_modified": "2026-10-04T07:06:02Z",
+      "resolved": "github:NixOS/nixpkgs/a322c65bf7233456788a9ebf03bc067db7dc090a#uv",
+      "source": "devbox-search",
+      "version": "0.12.17",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/956crlqxr9shs82arpb2ffsil0xln44y-uv-0.12.17",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/956crlqxr9shs82arpb2ffsil0xln44y-uv-0.12.17"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/64q43jd62h1h6zcdh4ly2yk8vrlyjm4s-uv-0.12.17",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/64q43jd62h1h6zcdh4ly2yk8vrlyjm4s-uv-0.12.17"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/wqpy2j3r0hjlmjyvq0wpd08rm5zn722y-uv-0.12.17",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/wqpy2j3r0hjlmjyvq0wpd08rm5zn722y-uv-0.12.17"
         }
       }
     },
