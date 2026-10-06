@@ -1,0 +1,3 @@
+# A project account needs the broker URLs.
+projects:
+  - name: shop

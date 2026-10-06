@@ -41,7 +41,7 @@ jobs:
       # the release version (its image tag defaults to appVersion), so
       # nats-broker is stamped with it too. The upstream release the broker
       # wraps is its dependency in Chart.yaml and its CHANGELOG entry.
-      charts: '["nats-auth-callout", "nats-broker"]'
+      charts: '["nats-auth-callout", "nats-broker", "nats-projects"]'
       # Nest the image under the repo namespace:
       # ko names the artifact after the cmd dir (cmd/responder), so the
       # published slug is ghcr.io/truvity/nats/responder.

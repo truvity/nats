@@ -1,0 +1,73 @@
+{{- /*
+Per row: the ServiceAccount NACK presents, its long-lived token Secret, and the
+NACK Account named after the namespace (the auth callout maps a namespace to
+the account of the same name).
+*/ -}}
+{{- $v := .Values -}}
+{{- $seen := dict -}}
+{{- range $p := $v.projects }}
+{{- if hasKey $seen $p.name }}{{ fail (printf "projects: %s is listed twice" $p.name) }}{{ end }}
+{{- $_ := set $seen $p.name true }}
+{{- if not $v.servers }}{{ fail (printf "servers is required: project %s has an account" $p.name) }}{{ end }}
+{{- $labels := mustMergeOverwrite (deepCopy ($v.labels | default dict)) ($p.labels | default dict) }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $v.serviceAccount }}
+  namespace: {{ $p.name }}
+  {{- with $labels }}
+  labels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if not (kindIs "invalid" $v.syncWave) }}
+  annotations:
+    argocd.argoproj.io/sync-wave: {{ $v.syncWave | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ $v.tokenSecret }}
+  namespace: {{ $p.name }}
+  {{- with $labels }}
+  labels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  annotations:
+    kubernetes.io/service-account.name: {{ $v.serviceAccount }}
+    {{- if not (kindIs "invalid" $v.syncWave) }}
+    argocd.argoproj.io/sync-wave: {{ $v.syncWave | quote }}
+    {{- end }}
+type: kubernetes.io/service-account-token
+---
+apiVersion: jetstream.nats.io/v1beta2
+kind: Account
+metadata:
+  name: {{ $p.name }}
+  namespace: {{ $p.name }}
+  {{- with $labels }}
+  labels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if or $v.protectAccounts (not (kindIs "invalid" $v.syncWave)) }}
+  annotations:
+    {{- if $v.protectAccounts }}
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    {{- if $v.helmKeep }}
+    helm.sh/resource-policy: keep
+    {{- end }}
+    {{- end }}
+    {{- if not (kindIs "invalid" $v.syncWave) }}
+    argocd.argoproj.io/sync-wave: {{ $v.syncWave | quote }}
+    {{- end }}
+  {{- end }}
+spec:
+  name: {{ $p.name }}
+  servers:
+    {{- toYaml $v.servers | nindent 4 }}
+  token:
+    secret:
+      name: {{ $v.tokenSecret }}
+    token: {{ $v.tokenKey }}
+{{- end }}

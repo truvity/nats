@@ -1,0 +1,5 @@
+# A namespace is one row.
+servers: ["nats://n:4222"]
+projects:
+  - name: shop
+  - name: shop

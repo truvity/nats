@@ -5,6 +5,15 @@ heading here is a patch cut automatically for dependency bumps alone; its
 GitHub Release lists them. The chart and the image are released together
 at every version.
 
+## Unreleased
+
+- **`nats-projects`, a new chart.** The NATS account of every project
+  namespace from a list of project rows, for an L3 `-projects` Application:
+  per row the ServiceAccount NACK presents, its token Secret and the NACK
+  `Account` named after the namespace (the callout's 1:1 rule). Accounts
+  carry `Prune=false,Delete=false`. The broker's `global.tenancy.accounts`
+  and the callout's `projectAccounts` are the same list of names.
+
 ## v1.4.0
 
 - **`nats-broker`: the `tenancy` preset.** Per-tenant accounts, the auth
