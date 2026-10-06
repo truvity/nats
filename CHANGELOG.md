@@ -7,6 +7,8 @@ at every version.
 
 ## Unreleased
 
+- **Internal:** the zero-diff gate (`hack/parity.sh`) is now a Go test, `tests/proof`, built on the shared `parity.Wrapper` of `github.com/truvity/cd/parity` instead of a private shell copy. Same cases, same verdict; no chart changes, no render changes.
+
 ## v1.5.0
 
 - **`nats-projects`, a new chart.** The NATS account of every project
