@@ -5,6 +5,11 @@ heading here is a patch cut automatically for dependency bumps alone; its
 GitHub Release lists them. The chart and the image are released together
 at every version.
 
+## v1.7.0
+
+- **Client adapters (`clients/`): Go and TypeScript.** `github.com/truvity/nats/clients/go/natsclient` (in this module) and `@truvity/nats-client` (GitHub Packages) connect an application to the broker with a verified connection always (the server CA file only, the server name from the URL), a workload certificate (SPIFFE URI SAN) or a ServiceAccount token file that is read again for every (re)connect, unlimited reconnect, JetStream stream and consumer defaults, trace headers written lower-case and read case-insensitively, and an orderly drain. One contract ([clients/README.md](clients/README.md)), one case list and one set of test vectors (`AccountForNamespace`, publish subjects) that every language and the callout itself are tested against. The conformance suites run against a real broker with the real callout responder (`just clients-go-conformance`, `just clients-ts-conformance`); a guard fails the job unless every case ran and passed, and certificate and token rotation are proven without restarting the client.
+- `pkg/nats-auth-callout` gains `RunWithReviewer`, `Run` with the TokenReviewer supplied; the binary is unchanged. It lets the conformance suites run the real responder without an API server.
+
 ## v1.6.0
 
 - **`pkg/tenancy` (new Go package) and a values schema for `global.tenancy.identities`.** `tenancy.Identities` maps a project's account, the environment's trust domain, its ServiceAccounts and the subjects they may publish to the preset's `identities` rows (`transport.SpiffeID` builds the ID), and `tenancy.ValidateClient` holds a deployment's catalogue to the rules the identities exist under. The chart's values schema now checks each `global.tenancy.identities` row: `spiffeId` is `spiffe://<trust domain>/ns/<namespace>/sa/<ServiceAccount>`, and `publish` is a non-empty, unique list of **concrete** subjects. **A wildcard in `publish` is now refused** (the preset's own comment always said the exact subjects): an identity exists to do one job, and a wildcard hands it the stream's whole subject space. The preset's templates and every render of a valid input are unchanged.

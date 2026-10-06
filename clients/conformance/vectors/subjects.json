@@ -1,0 +1,27 @@
+{
+  "description": "Subjects a client publishes to: concrete (no wildcards), dot-separated non-empty tokens of letters, digits, '-' and '_', at most 255 bytes, outside the broker's reserved space ($ prefix, _INBOX.).",
+  "valid": [
+    "orders",
+    "orders.created",
+    "orders.v1.created",
+    "Orders.Created_2.us-east",
+    "a.b.c.d.e.f"
+  ],
+  "invalid": [
+    "",
+    "orders.*",
+    "orders.>",
+    ">",
+    ".orders",
+    "orders.",
+    "orders..created",
+    "orders created",
+    "orders\tcreated",
+    "orders/created",
+    "$JS.API.INFO",
+    "$SYS.REQ.USER.AUTH",
+    "_INBOX.abc",
+    "orders.é"
+  ],
+  "tooLong": 256
+}

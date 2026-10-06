@@ -1,0 +1,23 @@
+{
+  "description": "The broker's namespace-to-account rule. A namespace in projectAccounts, emp-<slug>, ci-<org>-<repo> (org and repo non-empty, either may contain dashes) and exactly ci map to the account of the same name; everything else has none. Matching is exact and case-sensitive.",
+  "projectAccounts": ["shop", "billing"],
+  "cases": [
+    {"namespace": "shop", "account": "shop"},
+    {"namespace": "billing", "account": "billing"},
+    {"namespace": "Shop", "error": true},
+    {"namespace": "shop-2", "error": true},
+    {"namespace": "emp-alice", "account": "emp-alice"},
+    {"namespace": "emp-alice-b", "account": "emp-alice-b"},
+    {"namespace": "emp-", "error": true},
+    {"namespace": "ci", "account": "ci"},
+    {"namespace": "ci-truvity-gitops", "account": "ci-truvity-gitops"},
+    {"namespace": "ci-a-b-c", "account": "ci-a-b-c"},
+    {"namespace": "ci-scratch", "error": true},
+    {"namespace": "ci-", "error": true},
+    {"namespace": "ci--repo", "error": true},
+    {"namespace": "ci-org-", "error": true},
+    {"namespace": "ciao", "error": true},
+    {"namespace": "kube-system", "error": true},
+    {"namespace": "", "error": true}
+  ]
+}

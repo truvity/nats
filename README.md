@@ -161,6 +161,8 @@ environment variable.
 - [docs/openbao-external-secrets.md](docs/openbao-external-secrets.md):
   the seed in OpenBAO (or Vault) delivered by External Secrets: minting,
   manifests, rotation and a troubleshooting table
+- [clients/README.md](clients/README.md): the Go and TypeScript client
+  adapters, their contract and the conformance suite.
 - [CHANGELOG.md](CHANGELOG.md): what changed for a consumer, per version
 
 ## The rule that makes this repository public

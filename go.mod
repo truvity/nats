@@ -8,6 +8,7 @@ require (
 	github.com/nats-io/jwt/v2 v2.8.2
 	github.com/nats-io/nats.go v1.53.1
 	github.com/nats-io/nkeys v0.4.16
+	github.com/stretchr/testify v1.12.1
 	github.com/truvity/cd v0.15.0
 	github.com/truvity/policy v1.49.0
 	k8s.io/api v0.37.0

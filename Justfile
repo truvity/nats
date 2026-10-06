@@ -109,6 +109,46 @@ golden:
 leak-canary:
     hack/leak-canary.sh
 
+# The TypeScript client adapter (clients/ts): lint, type check, unit tests,
+# build. No broker needed; the conformance cases skip here.
+clients-ts:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd clients/ts
+    npm ci --no-audit --no-fund
+    npm run lint
+    npm run typecheck
+    npm test
+    npm run build
+    # What a release would publish: the built output and the README only.
+    # (The version is stamped from the tag at release time.)
+    npm pack --dry-run
+
+# The Go client adapter against a real broker with the auth callout (digest-
+# pinned image, certificates generated per run; clients/conformance/). Needs
+# docker. The guard fails the recipe unless every case in
+# clients/conformance/cases.txt ran and passed: a skipped suite is not a green
+# one. NOT part of `check` (which stays free of docker); CI runs it as its own
+# job.
+clients-go-conformance:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    trap 'clients/conformance/nats-broker.sh down' EXIT
+    eval "$(clients/conformance/nats-broker.sh up)"
+    out="$(mktemp)"
+    NATS_CLIENTS=required go test ./clients/go/... -run TestConformance -count=1 -json >"$out" || { grep -E '"Action":"(fail|output)"' "$out" | head -80 >&2; exit 1; }
+    clients/conformance/guard.sh go "$out"
+
+# The TypeScript client adapter against the same broker and case list.
+clients-ts-conformance:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    trap 'clients/conformance/nats-broker.sh down' EXIT
+    eval "$(clients/conformance/nats-broker.sh up)"
+    out="$(mktemp)"
+    (cd clients/ts && npm ci --no-audit --no-fund && NATS_CLIENTS=required npx vitest run test/conformance.test.ts --reporter=json --outputFile="$out") || { cat "$out" >&2; exit 1; }
+    clients/conformance/guard.sh ts "$out"
+
 # Run the tests under the race detector. The responder answers callout
 # requests concurrently and shares the broker connection between them, so a
 # data race there would be a wrong answer rather than a crash, and would not
@@ -135,7 +175,7 @@ clean:
     rm -rf bin/ dist/ coverage.out
 
 # Everything CI runs on a pull request.
-check: build lint test leak-canary
+check: build lint test leak-canary clients-ts
 
 # Build a snapshot release locally (no push, no tag)
 snapshot:
