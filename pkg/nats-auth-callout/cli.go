@@ -62,6 +62,20 @@ else is rejected.
 
 // Run is the entry point for the nats-auth-callout binary.
 func Run(args []string, version, gitCommit string) int {
+	return run(args, version, gitCommit, func() (TokenReviewer, error) {
+		return NewInClusterTokenReviewer()
+	})
+}
+
+// RunWithReviewer is Run with the TokenReviewer supplied instead of built from
+// the in-cluster configuration. It exists so a test can run the real responder
+// (login, subscription, decision, health) against a real broker without an API
+// server; the binary never calls it.
+func RunWithReviewer(args []string, version, gitCommit string, reviewer TokenReviewer) int {
+	return run(args, version, gitCommit, func() (TokenReviewer, error) { return reviewer, nil })
+}
+
+func run(args []string, version, gitCommit string, newReviewer func() (TokenReviewer, error)) int {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
@@ -95,7 +109,7 @@ func Run(args []string, version, gitCommit string) int {
 		return 1
 	}
 
-	reviewer, err := NewInClusterTokenReviewer()
+	reviewer, err := newReviewer()
 	if err != nil {
 		logger.ErrorContext(ctx, "failed to build kubernetes token reviewer", slog.Any("error", err))
 
