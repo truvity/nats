@@ -1,0 +1,57 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "truvity-nats-client"
+version = "0.0.0" # the release job stamps the tag: `uv version 1.7.0`
+description = "NATS client adapter for the shared broker: verify-full, per-connection credential reload, unlimited reconnect, JetStream defaults, trace headers."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.10"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Typing :: Typed",
+]
+dependencies = [
+  # The adapter overrides three private hooks of nats.aio.client.Client (see README),
+  # so the driver is held to the minor it was written and tested against.
+  "nats-py>=2.16.0,<2.17",
+]
+
+[project.urls]
+Repository = "https://github.com/truvity/nats/tree/master/clients/python"
+
+[dependency-groups]
+dev = [
+  "pytest>=8",
+  "ruff>=0.12",
+  "mypy>=1.15",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/truvity_nats"]
+
+[tool.uv]
+# The interpreter is the one the toolchain (devbox) declares, never one uv fetches,
+# as in the policy repository.
+python-preference = "only-system"
+python-downloads = "never"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+junit_family = "xunit2"
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"]
+
+[tool.mypy]
+strict = true
+python_version = "3.10"

@@ -40,7 +40,7 @@ up() {
   # --- authorities ---------------------------------------------------------
   for ca in ca other-ca; do
     openssl ecparam -name prime256v1 -genkey -noout -out "$ca.key" 2>/dev/null
-    openssl req -x509 -new -key "$ca.key" -sha256 -days 2 -subj "/CN=nats-clients-$ca" -out "$ca.crt" 2>/dev/null
+    openssl req -x509 -new -key "$ca.key" -sha256 -days 2 -subj "/CN=nats-clients-$ca" -addext "basicConstraints=critical,CA:TRUE" -addext "keyUsage=critical,keyCertSign,cRLSign" -out "$ca.crt" 2>/dev/null
   done
 
   # --- server: the name `localhost` and nothing else -------------------------
