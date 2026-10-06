@@ -309,7 +309,9 @@ func TestConformance(t *testing.T) {
 		first := e.waitConn(t, "token-file-rotation", func(connInfo) bool { return true })
 		require.NoError(t, os.WriteFile(tokenFile, []byte("token-shop-worker"), 0o600))
 		e.restart(t)
-		got := e.waitConn(t, "token-file-rotation", func(ci connInfo) bool { return ci.Account == "shop" && ci.AuthorizedUser != "" && ci.AuthorizedUser != first.AuthorizedUser })
+		got := e.waitConn(t, "token-file-rotation", func(ci connInfo) bool {
+			return ci.Account == "shop" && ci.AuthorizedUser != "" && ci.AuthorizedUser != first.AuthorizedUser
+		})
 		assert.NotEqual(t, first.AuthorizedUser, got.AuthorizedUser)
 		assert.Equal(t, "shop", got.Account)
 		require.Eventually(t, func() bool { return c.Health(context.Background()) == nil }, 20*time.Second, 100*time.Millisecond)
