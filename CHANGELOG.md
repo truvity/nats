@@ -5,6 +5,10 @@ heading here is a patch cut automatically for dependency bumps alone; its
 GitHub Release lists them. The chart and the image are released together
 at every version.
 
+## v1.8.1
+
+- Dependency updates.
+
 ## v1.8.0
 
 - **Client adapters: Python and Kotlin.** `truvity-nats-client` (nats-py; the wheel and sdist are attached to the GitHub release, GitHub Packages has no Python registry) and `com.truvity.nats:nats-client` (jnats; GitHub Packages, Maven) implement the same contract as the Go and TypeScript adapters and pass the same 19 conformance cases and test vectors against a real broker with the real callout responder (`just clients-python-conformance`, `just clients-kotlin-conformance`; the guard fails the job unless every case ran and passed). The language-specific differences are in each README.
