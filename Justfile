@@ -54,7 +54,7 @@ lint:
     # The dependency pin must be the vendored archive.
     hack/check-app-version.sh
     golangci-lint config verify
-    golangci-lint run ./...
+    GOTOOLCHAIN=local golangci-lint run ./...
 
 # Golden renders (every test case compared with tests/golden), the zero-diff
 # gate, the alert rules' own checks, and the unit tests.
