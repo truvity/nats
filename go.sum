@@ -82,8 +82,8 @@ github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWD
 github.com/stretchr/testify v1.12.1/go.mod h1:MDEgiDPPsNp5cuIrHPPCyornHKgEVbtFUmoNlxoYthg=
 github.com/truvity/cd v0.15.0 h1:oLcW6A8vsd+bT46epBJ+cCUTF1LV79MPzAQ4hhjD6x4=
 github.com/truvity/cd v0.15.0/go.mod h1:Ybdlzlr6uBKMzBnJUjLIdArMrShp5eAKgLwnsijONUc=
-github.com/truvity/policy v1.49.3 h1:s9AfAB/1UjejuXueizJrs7HvNQ4hFCPOTerV1gFQkTI=
-github.com/truvity/policy v1.49.3/go.mod h1:7zlVclPiBas2TvfUjZ/CxkZ47PU1iss5xa+lEi8vNkw=
+github.com/truvity/policy v1.50.1 h1:W7T6fkhaUM3/8ZgnyZz2LSpOeg/lKUMS6Pqv+Plfdww=
+github.com/truvity/policy v1.50.1/go.mod h1:7zlVclPiBas2TvfUjZ/CxkZ47PU1iss5xa+lEi8vNkw=
 github.com/x448/float16 v0.8.4 h1:qLwI1I70+NjRFUR3zs1JPUCgaCXSh3SW62uAKT1mSBM=
 github.com/x448/float16 v0.8.4/go.mod h1:14CWIYCyZA/cWjXOioeEpHeN/83MdbZDRQHoFcYsOfg=
 go.yaml.in/yaml/v2 v2.4.4 h1:tuyd0P+2Ont/d6e2rl3be67goVK4R6deVxCUX5vyPaQ=
