@@ -10,7 +10,7 @@ require (
 	github.com/nats-io/nkeys v0.4.16
 	github.com/stretchr/testify v1.12.1
 	github.com/truvity/cd v0.15.0
-	github.com/truvity/policy v1.50.1
+	github.com/truvity/policy v1.50.2
 	k8s.io/api v0.37.0
 	k8s.io/apimachinery v0.37.0
 	k8s.io/client-go v0.37.0
