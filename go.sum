@@ -53,6 +53,8 @@ github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnr
 github.com/json-iterator/go v1.1.12/go.mod h1:e30LSqwooZae/UwlEbR2852Gd8hjQvJoHmT4TnhNGBo=
 github.com/klauspost/compress v1.18.5 h1:/h1gH5Ce+VWNLSWqPzOVn6XBO+vJbCNGvjoaGBFW2IE=
 github.com/klauspost/compress v1.18.5/go.mod h1:cwPg85FWrGar70rWktvGQj8/hthj3wpl0PGDogxkrSQ=
+github.com/klauspost/compress v1.19.2 h1:hMRETovs/pu/dVWN7zIT1PGG8t509MwT6bO7XSi26R8=
+github.com/klauspost/compress v1.19.2/go.mod h1:cwPg85FWrGar70rWktvGQj8/hthj3wpl0PGDogxkrSQ=
 github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd h1:TRLaZ9cD/w8PVh93nsPXa1VrQ6jlwL5oN8l14QlcNfg=
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
@@ -82,6 +84,8 @@ github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWD
 github.com/stretchr/testify v1.12.1/go.mod h1:MDEgiDPPsNp5cuIrHPPCyornHKgEVbtFUmoNlxoYthg=
 github.com/truvity/cd v0.15.0 h1:oLcW6A8vsd+bT46epBJ+cCUTF1LV79MPzAQ4hhjD6x4=
 github.com/truvity/cd v0.15.0/go.mod h1:Ybdlzlr6uBKMzBnJUjLIdArMrShp5eAKgLwnsijONUc=
+github.com/truvity/cd v0.25.0 h1:TURqS8gPEu0lfzFxwsNI47w3KOvyVd8p19kD3g6BKoI=
+github.com/truvity/cd v0.25.0/go.mod h1:EJOv5SgLsBzS91yL6PfqwGQHzi4eYnUJoctnSH6MSnk=
 github.com/truvity/policy v1.50.2 h1:wgE2OjFjfXmcjLsHE3CSEZu2GwTAA+f1DCHk+rYbhGg=
 github.com/truvity/policy v1.50.2/go.mod h1:7zlVclPiBas2TvfUjZ/CxkZ47PU1iss5xa+lEi8vNkw=
 github.com/x448/float16 v0.8.4 h1:qLwI1I70+NjRFUR3zs1JPUCgaCXSh3SW62uAKT1mSBM=
