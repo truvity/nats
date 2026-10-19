@@ -5,6 +5,10 @@ heading here is a patch cut automatically for dependency bumps alone; its
 GitHub Release lists them. The chart and the image are released together
 at every version.
 
+## v1.9.1
+
+- Dependency updates.
+
 ## v1.9.0
 
 - **`pkg/issuerkey` (new Go package).** `issuerkey.FromPKCS8PEM` derives the callout's three strings from one ED25519 PKCS#8 PEM: the ACCOUNT seed (`SA...`, `NATS_ISSUER_SEED`), the ACCOUNT public key (`A...`, the broker's `auth_callout` issuer) and the USER public key (`U...`, the `auth_users` entry). Pure conversion, no dependency on how the key is minted, so an infrastructure program can generate the key with any provider and derive the callout's inputs with the same code the callout is tested with.
