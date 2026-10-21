@@ -2,7 +2,7 @@ module github.com/truvity/nats
 
 go 1.27.0
 
-toolchain go1.27.2
+toolchain go1.27.3
 
 require (
 	github.com/nats-io/jwt/v2 v2.8.2
