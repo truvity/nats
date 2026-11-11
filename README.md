@@ -157,9 +157,10 @@ list of names ([docs/adoption.md](docs/adoption.md),
 
 **Company part.** A company's SRE writes the streams and consumers its
 applications need in its own charts, in its own namespaces, and projects a
-ServiceAccount token with the audience `nats` (or uses a client adapter from
-[clients/README.md](clients/README.md)). The namespace maps to the NATS
-account of the same name ([docs/doctrine.md](docs/doctrine.md)).
+ServiceAccount token with an audience the callout accepts, `nats` by default
+(or uses a client adapter from [clients/README.md](clients/README.md)). The
+namespace maps to the NATS account of the same name
+([docs/doctrine.md](docs/doctrine.md)).
 
 ## Consumers
 
