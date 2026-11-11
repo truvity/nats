@@ -1,8 +1,8 @@
 # nats
 
-NATS on Kubernetes, in two Helm charts: `nats-auth-callout`, the workload-identity
-auth-callout responder, and `nats-broker`, a pinned wrapper over the upstream
-broker chart.
+NATS on Kubernetes, in three Helm charts: `nats-auth-callout`, the workload-identity
+auth-callout responder, `nats-broker`, a pinned wrapper over the upstream
+broker chart, and `nats-projects`, the NATS account of every project namespace.
 
 ## The auth-callout responder
 
@@ -34,6 +34,17 @@ renders** unless asked otherwise, with opt-in presets (restricted Pod
 Security, metrics, a JetStream cluster, spreading) and opt-in alert rules.
 See [docs/broker.md](docs/broker.md); moving an installation onto it is in
 [docs/adoption.md](docs/adoption.md#moving-a-broker-onto-nats-broker).
+
+## nats-projects
+
+`charts/nats-projects` renders the NATS account of every project namespace
+from a list of rows (`projects: [{name, labels}]`): the ServiceAccount NACK
+presents, its long-lived token Secret and the NACK `Account` named after the
+namespace. It is the shape of an L3 `-projects` Application: one release for
+every project of a cluster. Give the broker's tenancy preset
+(`global.tenancy.accounts`) and the callout (`projectAccounts`) the same names.
+Accounts carry `Prune=false,Delete=false` (`protectAccounts`), so the
+Application can prune the rest.
 
 ## The model
 
@@ -135,9 +146,24 @@ issued it; the clients' audiences stay the clients' contract.
 [docs/reference.md](docs/reference.md) has every value and every
 environment variable.
 
+## Platform part and company part
+
+**Platform part.** The platform admin applies the three charts on a cluster:
+`nats-broker` for the shared broker, `nats-auth-callout` beside it with the
+issuer seed Secret, and `nats-projects` with one row per registered project.
+The broker's tenancy accounts and the callout's `projectAccounts` are the same
+list of names ([docs/adoption.md](docs/adoption.md),
+[docs/broker.md](docs/broker.md)).
+
+**Company part.** A company's SRE writes the streams and consumers its
+applications need in its own charts, in its own namespaces, and projects a
+ServiceAccount token with the audience `nats` (or uses a client adapter from
+[clients/README.md](clients/README.md)). The namespace maps to the NATS
+account of the same name ([docs/doctrine.md](docs/doctrine.md)).
+
 ## Consumers
 
-- **truvity/gitops**: deploys the chart
+- **The maintainers' platform repository**: deploys the charts `nats-auth-callout`, `nats-broker` and `nats-projects`
 - **A second, non-AWS estate**: deploys the chart
 
 ## Neighbours
@@ -222,15 +248,3 @@ heading.
 ## Licence
 
 MIT — see [LICENSE](LICENSE).
-
-## nats-projects
-
-`charts/nats-projects` renders the NATS account of every project namespace
-from a list of rows (`projects: [{name, labels}]`): the ServiceAccount NACK
-presents, its long-lived token Secret and the NACK `Account` named after the
-namespace. It is the shape of an L3 `-projects` Application: one release for
-every project of a cluster. Give the broker's tenancy preset
-(`global.tenancy.accounts`) and the callout (`projectAccounts`) the same names.
-Accounts carry `Prune=false,Delete=false` (`protectAccounts`), so the
-Application can prune the rest.
-
